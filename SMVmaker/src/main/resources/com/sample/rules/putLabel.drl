@@ -1,0 +1,193 @@
+package com.sample.rules
+
+import com.model.lts.Transition;
+
+/*rule "modify a transition"
+ 	when
+    $t : Transition( label == "?/json.htm" )//conditions
+    then
+    System.out.println("transition exists: " + $t.toString());
+   	$t.setName($t.getName() + "boo");
+end*/
+
+
+rule "initial"
+	when
+	$t : Transition(source.isInit() == true)
+	then
+	$t.addParameter("initial=TRUE");
+end
+
+
+rule "getUpdate"
+	when
+	$t : Transition(isInput(), contain("update", "firmware", "get-update", "get_update") )
+	then
+	$t.addParameter("getUpdate=TRUE");
+end
+
+
+/*rule "encrypted" TODO
+	when
+	
+	then
+	
+end */
+
+
+/*rule "signature" TODO but how?
+	when
+	
+	then
+	
+end */
+
+
+/*rule "searchUpdate"  TODO
+	when
+	
+	then
+	
+end*/ 
+
+
+rule "login" //TODO abstraire en une seule transition
+	when
+	$t1 : Transition(isReq() == true, contain("login", "user"))
+	$t2 : Transition(isReq() == false, isOk() == true, getSource() == $t1.getTarget())
+	$t3 : Transition(isReq() == true, contain("password", "pass", "pwd"), getSource() == $t2.getTarget())
+	then
+	$t1.addParameter("loginAttempt=TRUE");
+	$t2.addParameter("loginAttempt=TRUE");
+	$t3.addParameter("loginAttempt=TRUE");
+end
+
+rule "login2"
+	when
+	$t : Transition(isReq() == true, contain("login", "user"), contain("password", "pass", "pwd"))
+	then
+	$t.addParameter("loginAttempt=TRUE");
+end
+
+rule "login3"
+	when
+	$t1 : Transition(isReq() == true, contain("login", "user"))
+	$t2 : Transition(isReq() == false, isOk() == false, getSource() == $t1.getTarget()) 
+	then
+	$t1.addParameter("loginAttempt=TRUE");
+end
+
+
+rule "authenticated"  
+	when
+	$t1 : Transition(isReq() == true, contain("password", "pass", "pwd"))
+	$t2 : Transition(isReq() == false, isOk() == true, getSource() == $t1.getTarget()) 
+	then
+	$t2.addParameter("authenticated=TRUE");
+end 
+
+rule "loginFail"
+	when
+	($t1 : Transition(isReq() == true, contain("login", "user"))
+	or
+	$t1 : Transition(isReq() == true, contain("password", "pass", "pwd")))
+	$t2 : Transition(isReq() == false, isOk() == false, getSource() == $t1.getTarget()) 
+	then
+	$t2.addParameter("loginFail=TRUE");
+end
+
+
+/*rule "lockout"  TODO
+	when
+	
+	then
+	
+end*/ 
+
+
+/*rule "passwordRecovery"  TODO
+	when
+	
+	then
+	
+end*/ 
+
+
+/*rule "blackListedWords"  TODO
+	when
+	
+	then
+	
+end*/ 
+
+
+rule "input"
+	when
+	$t : Transition(isInput())
+	then
+	$t.addParameter("input=TRUE");
+end
+
+
+/*rule "errorMsg"  TODO
+	when
+	
+	then
+	
+end*/ 
+
+
+/*rule "OK"  TODO
+	when
+	
+	then
+	
+end*/ 
+
+
+/*rule "NOK"  TODO
+	when
+	
+	then
+	
+end*/ 
+
+
+/*rule "compromised"  TODO
+	when
+	
+	then
+	
+end*/ 
+
+
+/*rule "XSS"  TODO
+	when
+	
+	then
+	
+end*/ 
+
+
+/*rule "sensitiveData"  TODO
+	when
+	
+	then
+	
+end*/ 
+
+
+/*rule "sendData"  TODO
+	when
+	
+	then
+	
+end*/ 
+
+
+/*rule "receiveCommandSearchUpdate"  TODO
+	when
+	
+	then
+	
+end*/ 
