@@ -38,12 +38,10 @@ public class Main {
 		KripkeToNuSMV.build(k, out);
 		
 		/** TODO 
-		 * generate NuSMV file from the kripke + file of LTL properties
-		 * 
 		 * run NuSMV on the file generated
 		 * 
 		 * assess the results and give information according to the results 
-		 * (number succes, wich fail, trace in case of failure, advise to 
+		 * (number success, which fail, trace in case of failure, advise to 
 		 * remediate, warning if too few data in the model,...)
 		 */
 		
