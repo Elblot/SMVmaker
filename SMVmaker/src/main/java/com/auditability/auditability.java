@@ -12,6 +12,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+
 /*
  * checks the level of auditability of the log
  * uses the external tool ent 
@@ -28,7 +31,7 @@ public class auditability {
 		}
 	}
 
-	private static  boolean auditabilityLv1(File log) {
+	private static boolean auditabilityLv1(File log) {
 		String command = "ent " + log; 
 
 		// Running the above command 
@@ -43,12 +46,12 @@ public class auditability {
 				builder.append(System.getProperty("line.separator"));
 			}
 			String result = builder.toString();
-			//System.out.println(result);
+			System.out.println(result);
 			double entropy = getEntropy(result);
-			int compression = getCompression(result);
+			//int compression = getCompression(result);
 			double chi = getChiSquare(result);
 			double mean = getMean(result);
-			double carlo = getMonteCarlo(result);
+			//double carlo = getMonteCarlo(result);
 			double serial = getSerialCorrelation(result);
 			/*System.out.println("Entropy : " + entropy);
 			System.out.println("Compression : " + compression);
@@ -56,8 +59,8 @@ public class auditability {
 			System.out.println("Mean : " + mean);
 			System.out.println("Monte Carlo : " + carlo);
 			System.out.println("Serial Correlation : " + serial);*/
-			if (entropy > 7.9 | compression < 5 | (chi < 90 & chi > 10) | 
-					(mean < 130 & mean > 125) | (carlo < 3.18 & carlo > 3.10) |
+			if (entropy > 7.9 | /*compression < 5 |*/ (chi < 90 & chi > 10) | 
+					(mean < 130 & mean > 125) | /*(carlo < 3.18 & carlo > 3.10) |*/
 					(serial < 0.05 & serial > -0.05)) {
 				return false;
 			}
@@ -69,33 +72,37 @@ public class auditability {
 		return true;
 	}
 
+	/*
+	 * 	tshark pour recup la partie data seulement de chaque packet
+	 *  lire le fichier generer par tshark 
+	 *  pour chaque ligne lancer ent dessus
+	 */
 	private static double auditabilityLv2(File log) {
-
-		/*
-		 * 	tshark pour recup la partie data seulement de chaque packet
-		 *  lire le fichier generer par tshark 
-		 *  pour chaque ligne lancer ent dessus
-		 */
-
 		/* run tshark */ 
-		String command = "tshark -r " + log.getName() + " -T fields -e data -w tmpfile"; 
+		String command = "tshark -r " + log.getName() + " -E separator=\":\" -E aggregator=\":\" -T fields -e tcp.payload -e data.data"; 
 		Runtime run  = Runtime.getRuntime(); 
+		String line= "";
 		try {
 			Process proc = run.exec(command);
-			try {
-				proc.waitFor();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			BufferedReader br =	new BufferedReader(new FileReader(new File("tmpfile")));
-			String line = br.readLine();
+			//proc.waitFor();
+			BufferedReader br =	new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			//String 
+			line = br.readLine();
 			int c = 0;
 			int tot = 0;
 			while (line != null) {
-				//System.out.println(line);
+				line = line.replaceAll(":", "");
+				line = line.replaceAll("\"", "");
+				byte[] bytes;
+				bytes = Hex.decodeHex(line.toCharArray());
+				line = new String(bytes);
+				//System.out.println("line = " + line);
+				if (line.isEmpty()) {
+					line = br.readLine();
+					continue;
+				}
 				tot++;
-				/* lance ent */
+				/* run ent */
 				command = "ent"; 
 				run  = Runtime.getRuntime(); 
 
@@ -103,7 +110,7 @@ public class auditability {
 				OutputStream stdin = proc.getOutputStream();
 				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(stdin));
 
-				writer.write("xoxoxoxoxoxoxxoxoxoxoxoxo");
+				writer.write(line);
 				writer.flush();
 				writer.close();
 
@@ -114,13 +121,14 @@ public class auditability {
 					builder.append(l);
 					builder.append(System.getProperty("line.separator"));
 				}
+				reader.close();
 				String result = builder.toString();
 				//System.out.println(result);
 				double entropy = getEntropy(result);
-				int compression = getCompression(result);
+				//int compression = getCompression(result);
 				double chi = getChiSquare(result);
 				double mean = getMean(result);
-				double carlo = getMonteCarlo(result);
+				//double carlo = getMonteCarlo(result);
 				double serial = getSerialCorrelation(result);
 				/*System.out.println("Entropy : " + entropy);
 				System.out.println("Compression : " + compression);
@@ -128,25 +136,31 @@ public class auditability {
 				System.out.println("Mean : " + mean);
 				System.out.println("Monte Carlo : " + carlo);
 				System.out.println("Serial Correlation : " + serial);*/
-				if (entropy > 7.9 | compression < 5 | (chi < 90 & chi > 10) | 
-						(mean < 130 & mean > 125) | (carlo < 3.18 & carlo > 3.10) |
+				if (entropy > 7.9 | /*compression < 5 |*/ (chi < 90 & chi > 10) | 
+						(mean < 129 & mean > 126) | /*(carlo < 3.18 & carlo > 3.10) |*/
 						(serial < 0.05 & serial > -0.05)) {
+					//System.out.println(line);
+					//System.out.println(result);
 					c++;
 				}
 				line = br.readLine();
 			}
 			br.close();
 			System.out.println(c + " encrypted message on " + tot + " at total");
+			return 1 - (double) c/tot;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			System.out.println("no idea");
+			//System.out.println("no idea");
 			e.printStackTrace();
-		}
-		return 1;
+		} catch (DecoderException e) {
+			// TODO Auto-generated catch block
+			//System.out.println("line = " + line);
+			e.printStackTrace();
+		} 
+		return 2;
 	}
 
 	private static double getEntropy(String res) {
-		//System.out.println(res);
 		return Double.valueOf(res.substring(10, res.indexOf(" bits")));
 	}
 
@@ -168,6 +182,9 @@ public class auditability {
 	}
 
 	private static double getMonteCarlo(String res) {
+		if (res.substring(res.indexOf("Pi is ") + 6, res.indexOf(" (error")).equals("-nan")) {
+			return 0;
+		}
 		return Double.valueOf(res.substring(res.indexOf("Pi is ") + 6, res.indexOf(" (error")));
 	}
 
@@ -177,6 +194,7 @@ public class auditability {
 
 	public static void main (String[] args) {
 		File log = new File(args[0]);
-		getAuditability(log);
+		double lvl = getAuditability(log);
+		System.out.println("The lvl of auditability = " + lvl);
 	}
 }
