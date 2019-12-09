@@ -1,0 +1,1 @@
+GP-TM-18;;;(G (getUpdate=TRUE ->(encrypted=TRUE & sensitiveData=FALSE))) & ((F getUpdate=TRUE) -> (getUpdate=FALSE U (authenticated=TRUE & getUpdate=FALSE)));;;The update file is sent encrypted, doesn't contains sensitive data, by an authenticated entity.

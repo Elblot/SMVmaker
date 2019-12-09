@@ -27,12 +27,12 @@ rule "getUpdate"
 end
 
 
-/*rule "encrypted" TODO
+rule "encrypted" 
 	when
-	
+	$t : Transition(isEncrypted())
 	then
-	
-end */
+	$t.addParameter("encrypted=TRUE");
+end 
 
 
 /*rule "signature" TODO but how?
@@ -43,12 +43,12 @@ end */
 end */
 
 
-/*rule "searchUpdate"  TODO
+rule "searchUpdate"
 	when
-	
+	$t : Transition(isReq() == true, isInput() == false, contain("update", "findUpdate", "get_update", ""))
 	then
-	
-end*/ 
+	$t.addParameter("searchUpdate=TRUE");
+end
 
 
 rule "login" //TODO abstraire en une seule transition

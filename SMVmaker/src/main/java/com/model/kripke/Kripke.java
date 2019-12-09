@@ -66,11 +66,10 @@ public class Kripke {
 	 */
 	private void transformLabels(){
 		Set<String> keyWords = getParameters();
-		System.out.println(keyWords);
 		for (StateK st : getStates()) {
 			st.transformLabel(keyWords);
 		}
-		System.out.println(keyWords);
+		//System.out.println(keyWords);
 	}
 	
 	public Set<String> getParameters(){

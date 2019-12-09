@@ -7,20 +7,25 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+
+import com.auditability.auditability;
+
 public class Transition {
 
 	private String name;
 	private String label;
 	private String[] parameters;
-	
+
 	private State source;
 	private State target;
-	
+
 	public Transition() {
 		source = new State();
 		target = new State();		
 	}
-	
+
 	public Transition(State src, String trans, State dst) {
 		parameters = new String[3];
 		//name = trans;
@@ -33,7 +38,88 @@ public class Transition {
 		source = src;
 		target = dst;
 	}
-	
+
+	public boolean isEncrypted() {
+		//System.out.println(this);
+		String data = getData();
+		//System.out.println(data);
+		if (data.length() < 16) {
+			return false;
+		}
+		if (data.isEmpty()) {
+			return false;
+		}
+		data = data.replaceAll(":", "");
+		data = data.replaceAll("\"", "");
+		if (isHex(data)) {
+			try {
+				byte[] bytes;
+				bytes = Hex.decodeHex(data.toCharArray());
+				data = new String(bytes);
+			} catch (DecoderException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+		//System.out.println("run ent here");
+		return auditability.runEnt(data);
+	}
+
+	private boolean isHex(String hex) {
+		for (char c : hex.toCharArray()) {
+			switch (c) {
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+			case 'a':
+			case 'b':
+			case 'c':
+			case 'd':
+			case 'e':
+			case 'f':
+			case 'A':
+			case 'B':
+			case 'C':
+			case 'D':
+			case 'E':
+			case 'F':
+				continue;
+			default:
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private String getData() {
+		String data = "";
+		String event = parameters[0];
+		event = event.substring(event.indexOf("("), event.length() - 1);
+		while (!event.isEmpty()) {
+			String param = "";
+			if (event.contains(";")){
+				param = event.substring(0, event.indexOf(";")); //; is the separator
+			}
+			else {
+				param = event;
+			}
+			event = event.replace(param, "");
+			event = event.replaceFirst(";", "");
+			if (!param.contains("Host=") & !param.contains("Dest=") & !param.contains("Protocol=") & param.contains("=")) {
+				data = data + param.substring(param.indexOf("=")+1, param.length());
+			}
+		}
+		return data;
+	}
+
 	private String getFrom(String trans) {
 		String from = "none" ;
 		int d = trans.indexOf("Host=");
@@ -47,7 +133,7 @@ public class Transition {
 		}
 		return from;
 	}
-	
+
 	private String getTo(String trans) {
 		String to = "none" ;
 		int d = trans.indexOf("Dest=");
@@ -61,15 +147,15 @@ public class Transition {
 		}
 		return to;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
-	
+
 	public void setName(String newname) {
 		name = newname;
 	}
-	
+
 	public void updateName() {
 		String newname = "";// label + "(";
 		newname = newname + parameters[0];
@@ -79,38 +165,42 @@ public class Transition {
 		//newname = newname + ")";
 		name = newname;
 	}
-	
-	
+
+
 	public String getLabel() {
 		return label;
 	}
-	
-	public boolean contain(String... strings) {//TODO 	eviter les doublons
+
+	public boolean contain(String... strings) {
 		for (String param : oldParameters()) {
 			String leftpart = "";
+			String rightpart = "";
 			if (param.contains("=")){
 				leftpart = param.substring(0, param.indexOf("="));
+				rightpart = param.substring(param.indexOf("=") + 1);
 			}
 			else {
 				leftpart = param;
+				rightpart = param;
 			}
 			for (String word : strings) {
-				if (leftpart.equals(word)) {
+				if (leftpart.equals(word) | rightpart.equals(word)) {
 					return true;
 				}
+				
 			}
 		}
 		return false;
-	}
-	
+	}	
+
 	private Set<String> oldParameters(){
 		Set<String> param = new HashSet<String>();
 		Collections.addAll(param, name.substring(name.indexOf("(")+1,name.lastIndexOf(")")).split(";", 0));
 		return param;		
 	}
-	
+
 	/*public boolean equals(Set<String> params) {
-		
+
 	}*/
 
 	// never used 
@@ -118,11 +208,11 @@ public class Transition {
 		label = newlabel;	
 		updateName();
 	}
-	
+
 	public String[] getParameters() {
 		return parameters;
 	}
-	
+
 	public void addParameter(String newparam) {
 		String[] newparameters = new String[parameters.length + 1];
 		for (int i = 0; i < parameters.length; ++i ) {
@@ -132,50 +222,50 @@ public class Transition {
 		parameters = newparameters;
 		updateName();
 	}
-	
+
 	//never used 
 	public void setParameters(String[] newparam) {
 		parameters = newparam;
 	}
 
-	
+
 	public State getSource() {
 		return source;
 	}
-	
+
 	public void setSource(State newsource) {
 		source = newsource;
 	}
-	
+
 	public State getTarget() {
 		return target;
 	}
-	
+
 	public void setTarget(State newtarget) {
 		target = newtarget;
 	}
-	
+
 	public boolean equals(String t) {
 		return name.equals(t);
 	}
-	
+
 	public String toString() {
 		return name;				
 	}
-	
+
 	public boolean isInput() {
 		return label.startsWith("?");
 	}
-	
+
 	public boolean isReq() {
 		return !name.contains("esponse");
 	}
-	
+
 	public boolean isOk() {
 		if (!isReq()) {
 			return name.contains("=OK");
 		}
 		return false;
 	}
-	
+
 }

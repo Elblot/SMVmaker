@@ -72,6 +72,7 @@ public class auditability {
 		return true;
 	}
 
+
 	/*
 	 * 	tshark pour recup la partie data seulement de chaque packet
 	 *  lire le fichier generer par tshark 
@@ -140,6 +141,7 @@ public class auditability {
 						(mean < 129 & mean > 126) | /*(carlo < 3.18 & carlo > 3.10) |*/
 						(serial < 0.05 & serial > -0.05)) {
 					//System.out.println(line);
+					//System.out.println(tot);
 					//System.out.println(result);
 					c++;
 				}
@@ -158,6 +160,59 @@ public class auditability {
 			e.printStackTrace();
 		} 
 		return 2;
+	}
+
+	public static boolean runEnt(String value) {
+		try {
+			/* run ent */
+			String command = "ent"; 
+			Runtime run  = Runtime.getRuntime(); 
+
+			Process proc = run.exec(command);
+			OutputStream stdin = proc.getOutputStream();
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(stdin));
+
+			writer.write(value);
+			writer.flush();
+			writer.close();
+
+			BufferedReader reader =	new BufferedReader(new InputStreamReader(proc.getInputStream()));
+			StringBuilder builder = new StringBuilder();
+			String l = null;
+			while ( (l = reader.readLine()) != null) {
+				builder.append(l);
+				builder.append(System.getProperty("line.separator"));
+			}
+			reader.close();
+			String result = builder.toString();
+			//System.out.println(result);
+			double entropy = getEntropy(result);
+			//int compression = getCompression(result);
+			double chi = getChiSquare(result);
+			double mean = getMean(result);
+			//double carlo = getMonteCarlo(result);
+			double serial = getSerialCorrelation(result);
+			/*System.out.println("Entropy : " + entropy);
+				System.out.println("Compression : " + compression);
+				System.out.println("ChiSquare : " + chi);
+				System.out.println("Mean : " + mean);
+				System.out.println("Monte Carlo : " + carlo);
+				System.out.println("Serial Correlation : " + serial);*/
+			if (entropy > 7.9 | /*compression < 5 |*/ (chi < 90 & chi > 10) | 
+					(mean < 129 & mean > 126) | /*(carlo < 3.18 & carlo > 3.10) |*/
+					(serial < 0.05 & serial > -0.05)) {
+				//System.out.println(value);
+				//System.out.println(result);
+				return true;
+			}
+			//System.out.println(value);
+			//System.out.println(result);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			//System.out.println("no idea");
+			e.printStackTrace();
+		} 
+		return false;
 	}
 
 	private static double getEntropy(String res) {

@@ -18,7 +18,7 @@ import com.model.lts.Transition;
 /**
  * This is a sample class to launch a rule.
  */
-public class DroolsTest {
+public class DroolsExec {
 
 	/*
 	 * run drools in order to put new labels in the transitions

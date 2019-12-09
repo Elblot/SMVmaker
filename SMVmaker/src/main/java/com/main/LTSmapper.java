@@ -32,7 +32,7 @@ public class LTSmapper {
 					String keyTarget = line.substring(line.indexOf(" ->")+4, line.indexOf("["));
 					State source = lts.getState(keySource);
 					State target = lts.getState(keyTarget);
-					String trname = line.substring(line.indexOf("label =")+8, line.indexOf("]")-1); 
+					String trname = line.substring(line.indexOf("label =")+8, line.lastIndexOf("]") - 1); 
 					Transition transition = new Transition(source, trname, target);
 					lts.addTransition(transition);
 					source.addSuccesseur(transition);
