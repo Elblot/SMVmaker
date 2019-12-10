@@ -4,10 +4,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
+import com.main.KeyWord;
 import com.model.lts.LTS;
 import com.model.lts.State;
 import com.model.lts.Transition;
@@ -16,17 +18,20 @@ public class Kripke {
 
 	private Set<StateK> states;
 	private Set<StateK> init;
+	private Set<String> parameters;
 
 
-	public Kripke (LTS lts) {
+	public Kripke (LTS lts, HashMap<String, KeyWord> keyWords) {
 		states = new HashSet<StateK>();
 		init = new HashSet<StateK>();
+
 		/* create the states */
 		for (State st : lts.getStates()) {
 			for(Transition tr : st.getSuccesseurs()) {
 				Set<String> param = new HashSet<String>();
 				param.add("state=" + st.getLabel());
 				Collections.addAll(param, tr.getParameters());
+				//System.out.println(param);
 				StateK state = new StateK(param);
 				state.addSucc(tr.getTarget().getLabel());
 				StateK simi = contains(state);				
@@ -57,6 +62,7 @@ public class Kripke {
 				}
 			}
 		}
+		makeParameters(keyWords);
 		transformLabels();
 	}
 
@@ -65,14 +71,40 @@ public class Kripke {
 	 * TODO
 	 */
 	private void transformLabels(){
-		Set<String> keyWords = getParameters();
+		//Set<String> keyWords = getParameters();
 		for (StateK st : getStates()) {
-			st.transformLabel(keyWords);
+			st.transformLabel(parameters);
 		}
 		//System.out.println(keyWords);
 	}
+
+	public void makeParameters(HashMap<String, KeyWord> keyWords){
+		this.parameters = new HashSet<String>();
+		for (StateK st : getStates()) {
+			for (String param: st.getParameters()) {
+				String leftpart = "";
+				if (param.contains("=")){
+					leftpart = param.substring(0, param.indexOf("="));
+				}
+				else {
+					System.err.println("Warning : all parameters should contain a \"= \"");
+					leftpart = param;
+				}
+				this.parameters.add(leftpart);
+			}
+		}
+		for (String param: keyWords.keySet()) {
+			if (keyWords.get(param).getNecessary() == 1) {
+				this.parameters.add(param);
+			}
+		}
+	}
 	
 	public Set<String> getParameters(){
+		return parameters;
+	}
+
+	/*public Set<String> getParameters(){
 		Set<String> keyWords = new HashSet<String>();
 		for (StateK st : getStates()) {
 			for (String param: st.getParameters()) {
@@ -88,10 +120,10 @@ public class Kripke {
 			}
 		}
 		return keyWords;
-	}
-	
+	}*/
+
 	public Set<String> getValues(String param){
-		if (!getParameters().contains(param)) {
+		if (!parameters.contains(param)) {
 			System.err.println("unknown parameter : " + param);
 			return null;
 		}
@@ -99,11 +131,11 @@ public class Kripke {
 		for (StateK state: states) {
 			res.add(state.getValue(param));
 		}
-		
-		
+
+
 		return res;
 	}
-	
+
 
 	/* verify if an equivalent state is already in the model
 	 * and return it if it is the case */

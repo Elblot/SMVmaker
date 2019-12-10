@@ -34,41 +34,49 @@ public class Main {
 		if (gen) {
 			GenerateDOT.printDot(lts, "ModifiedLabel.dot");
 		}
-		Kripke k = new Kripke(lts);
+		
+		
+		
+		HashMap<String, KeyWord> keyWords = makeKeyWords();
+		
+		Kripke k = new Kripke(lts, keyWords);
 		
 		Set<KeyWord> missing = new HashSet<KeyWord>();
-		HashMap<String, KeyWord> keyWords = makeKeyWords();
 		HashMap<String, LTLProperty> properties = makeProperties(keyWords);
-		Set<String> param = k.getParameters();
+		Set<String> param = k.getParameters();/////////////////////
 		Set<LTLProperty> LTLmissing = new HashSet<LTLProperty>();
 		for (String k2: keyWords.keySet()) {
 			if (!param.contains(k2) & keyWords.get(k2).getNecessary() == 0) {
 				missing.add(keyWords.get(k2));
 				LTLmissing.addAll(keyWords.get(k2).getLinks());
 			}
-			else if (!param.contains(k2) & keyWords.get(k2).getNecessary() == 1) {
-				param .add(k2);
-			}
+			/*else if (!param.contains(k2) & keyWords.get(k2).getNecessary() == 1) {
+				param.add(k2);
+			}*/
 		}
 		
 		
-		
 		if (!missing.isEmpty()) {
-			
 			System.out.println("following keywords are missing in the model:");
 			for (KeyWord k2: missing) {
 				System.out.println(k2.toString());
 			}
-			System.out.println("Consequently the following property will not be verified : " + LTLmissing);
+			System.out.println("Consequently the following properties, using these keywords will not be verified : ");
+			for (LTLProperty ltl : LTLmissing) {
+				System.out.println(ltl);
+				properties.remove(ltl.getName());
+			}
 		}
 		
 		System.out.println("param :" + param);
+		
 		if (gen) {
 			GenerateDOT.printDot(k, "Kripke.dot");
 		}
 		
 		File out = new File(output);
-		KripkeToNuSMV.build(k, out);
+		KripkeToNuSMV.build(k, out, param, properties);
+		
 
 		/** TODO 
 		 * run NuSMV on the file generated

@@ -53,7 +53,7 @@ public class StateK {
 					System.err.println("param have to contain a \"=\"");
 				}
 				if (parameter.equals(leftpart)) {
-					return rightpart;
+					return rightpart.replaceAll("\"", "");
 				}
 		}
 		System.err.println("stateK : " + this.toString() + "doesn't contain the parameter :" + parameter);
