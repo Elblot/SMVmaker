@@ -85,9 +85,9 @@ public class StateK {
 			list.add(leftpart);
 		}
 		Set<String> save = new HashSet<String>(keyWords);
-		save.removeAll(list);//TODO clone it?
+		save.removeAll(list);
 		for (String param: save) {
-			if (param.equals("authenticated")) {
+			if (param.equals("authenticated") | param.equals("sendDataTo")) { //TODO automating the detection of non-boolean
 				parameters.add(param + "=NULL");
 			}
 			else {

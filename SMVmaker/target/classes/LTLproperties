@@ -4,10 +4,9 @@ GP-TM-24/GP-TM-40;;;G(loginAttempt -> encrypted);;;data are encrypted during aut
 GP-TM-25;;; F TRUE  ;;;after 5 failed authentication attempts, the account is locked
 GP-TM-26;;;G(passwordRecovery ->  !blackListedWord);;;password recovery system doesn't give too much information about existing users
 GP-TM-38;;;G(sensitiveData -> encrypted);;;sensitive data are encrypted
-GP-TM-42;;; (F (OK & to = *compo*) -> (!(OK & to = *compo*) U (authenticated = *compo* & !(OK & to = *compo*)))) & ;;;need authentication before receiving and sending data to an other component
-GP-TM-42(2);;; F TRUE ;;;need authentication before sending data to an other component
+GP-TM-42;;; (F (OK & to = *compo*) -> (!(OK & to = *compo*) U (authenticated = *compo* & !(OK & to = *compo*)))) & (F (sendDataTo = *compo*) -> (!sendDataTo = *compo* U (authenticated = *compo* & !sendDataTo = *compo* )));;;need authentication before receiving and sending data to an other component
 GP-TM-46/GP-TM-51;;; F TRUE  ;;;the component doesn't accept more than X connections at the same time, resistance to DoS
-GP-TM-48(1);;; F TRUE ;;;if an other component is unavailable, this component stay available
-GP-TM-48(2);;; F TRUE ;;;if an other component send compromised data, this component doesn't accept this data
+GP-TM-48(1);;; !G(from = *dep* & NOK -> X initial) | G(from = *dep* & OK -> initial)) ;;;if an other component is unavailable, this component stay available
+GP-TM-48(2);;; G((from = *dep* & compromised) -> X(NOK));;;if an other component send compromised data, this component doesn't accept these data
 GP-TM-52;;; G(XSS -> X(NOK));;; the component doesn't accept requests that contains code injection
 GP-TM-53;;; G(errorMsg -> !blackListedWord) ;;; error messages doesn't contain too much information

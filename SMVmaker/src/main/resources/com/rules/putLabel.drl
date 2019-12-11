@@ -177,12 +177,12 @@ end*/
 end*/ 
 
 
-/*rule "sendData"  TODO
+rule "sendDataTo"
 	when
-	
+	$t : Transition(isReq() == true, !isInput(), !contain("login", "user", "password", "pass", "pwd"))
 	then
-	
-end*/ 
+	$t.addParameter("sendDataTo=" + $t.getOtherCompo());
+end
 
 
 /*rule "receiveCommandSearchUpdate"  TODO
