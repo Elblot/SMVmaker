@@ -134,7 +134,7 @@ public class Transition {
 		return from;
 	}
 
-	private String getTo(String trans) {
+	public String getTo(String trans) {
 		String to = "none" ;
 		int d = trans.indexOf("Dest=");
 		if (d != -1) {
@@ -256,7 +256,17 @@ public class Transition {
 	public boolean isInput() {
 		return label.startsWith("?");
 	}
-
+	
+	/* return the name of the component that communicate with the one modeled */
+	public String getOtherCompo() {
+		if (isInput()) {
+			return getFrom(name);
+		}
+		else {
+			return getTo(name);
+		}
+	}
+	
 	public boolean isReq() {
 		return !name.contains("esponse");
 	}

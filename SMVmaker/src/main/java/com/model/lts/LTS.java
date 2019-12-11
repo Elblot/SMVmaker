@@ -18,18 +18,21 @@ public class LTS {
 
 	/* Set of states */
 	private HashMap<String, State> states;
-
+	
 
 	public LTS() {
 		transitions = new HashSet<Transition>();
 		states = new HashMap<String, State>(); 
 	}
-
+	
+	
+	
 	public void addTransitions(ArrayList<Transition> tr){
 		for(Transition t:tr){
 			addTransition(t);
 		}
 	}
+	
 	
 	public void addTransition(Transition transition) {
 		//String key = transition.getSource().toString() + transition.getName() + transition.getTarget().toString();
@@ -55,6 +58,15 @@ public class LTS {
 
 	public State getState(String st) {
 		return states.get(st);
+	}
+	
+	/* return the components that communicate with this one */
+	public Set<String> getCompo() {
+		Set<String> compo = new HashSet<String>();
+		for (Transition t : transitions) {
+			compo.add(t.getOtherCompo());
+		}
+		return compo;
 	}
 	
 	/*	

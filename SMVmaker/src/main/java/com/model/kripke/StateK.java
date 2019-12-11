@@ -87,7 +87,12 @@ public class StateK {
 		Set<String> save = new HashSet<String>(keyWords);
 		save.removeAll(list);//TODO clone it?
 		for (String param: save) {
-			parameters.add(param + "=FALSE");
+			if (param.equals("authenticated")) {
+				parameters.add(param + "=NULL");
+			}
+			else {
+				parameters.add(param + "=FALSE");
+			}
 		}
 	}
 	

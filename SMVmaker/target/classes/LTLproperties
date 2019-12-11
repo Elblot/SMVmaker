@@ -1,10 +1,10 @@
-GP-TM-18;;;(G (getUpdate=TRUE ->(encrypted=TRUE & sensitiveData=FALSE))) & ((F getUpdate=TRUE) -> (getUpdate=FALSE U (authenticated=TRUE & getUpdate=FALSE)));;;The update file is sent encrypted, doesn't contains sensitive data, by an authenticated entity.
+GP-TM-18;;;(G (getUpdate=TRUE ->(encrypted=TRUE & sensitiveData=FALSE))) & ((F (getUpdate=TRUE & To = *compo*)) -> (getUpdate=FALSE U (authenticated = *compo* & getUpdate=FALSE)));;;The update file is sent encrypted, doesn't contains sensitive data, by an authenticated entity.
 GP-TM-19;;;F searchUpdate -> !G (!searchUpdate U (cmdSearchUpdate & !searchUpdate));;;The device can automatically search for updates
 GP-TM-24/GP-TM-40;;;G(loginAttempt -> encrypted);;;data are encrypted during authentication phase,credential are not exposed in the traffic
 GP-TM-25;;; F TRUE  ;;;after 5 failed authentication attempts, the account is locked
 GP-TM-26;;;G(passwordRecovery ->  !blackListedWord);;;password recovery system doesn't give too much information about existing users
 GP-TM-38;;;G(sensitiveData -> encrypted);;;sensitive data are encrypted
-GP-TM-42(1);;; F TRUE ;;;need authentication before receiving data from other component
+GP-TM-42;;; (F (OK & to = *compo*) -> (!(OK & to = *compo*) U (authenticated = *compo* & !(OK & to = *compo*)))) & ;;;need authentication before receiving and sending data to an other component
 GP-TM-42(2);;; F TRUE ;;;need authentication before sending data to an other component
 GP-TM-46/GP-TM-51;;; F TRUE  ;;;the component doesn't accept more than X connections at the same time, resistance to DoS
 GP-TM-48(1);;; F TRUE ;;;if an other component is unavailable, this component stay available

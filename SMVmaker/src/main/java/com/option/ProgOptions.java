@@ -19,6 +19,7 @@ public class ProgOptions {
 		    Main.dir = line.getOptionValue("input");
 		    Main.output = line.getOptionValue("output");
 		    Main.gen = line.hasOption("g");
+		    Main.dep = line.getOptionValue("dep");
 		    
 		    		
 		    /*if(!Main.algo.equals("complete") && !Main.algo.equals("compo") && !Main.algo.equals("ASSESSweak") && !Main.algo.equals("ASSESSstrong") && !Main.algo.equals("kbehavior")) {
@@ -35,10 +36,18 @@ public class ProgOptions {
 	
 		final Option dirFileOption = Option.builder("i")
 				.longOpt("input")
-				.desc("LTS")
+				.desc("LTS describing the behaviour of the component")
 				.hasArg(true)
 				.argName("input")
 				.required(true)
+				.build();
+		
+		final Option depFileOption = Option.builder("d")
+				.longOpt("dep")
+				.desc("DAG of dependency of the component")
+				.hasArg(true)
+				.argName("dep")
+				.required(false)
 				.build();
 		
 		final Option outputFileOption = Option.builder("o")
@@ -60,6 +69,7 @@ public class ProgOptions {
 	    final Options options = new Options();
 	
 	    options.addOption(dirFileOption);
+	    options.addOption(depFileOption);
 	    options.addOption(outputFileOption);
 	    options.addOption(intermediateFileOption);
 	    

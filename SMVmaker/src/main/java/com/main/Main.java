@@ -20,6 +20,7 @@ public class Main {
 	public static String dir;
 	public static boolean gen;	
 	public static String output;
+	public static String dep;
 
 	public static void main(String[] args) {
 		try {
@@ -34,16 +35,16 @@ public class Main {
 		if (gen) {
 			GenerateDOT.printDot(lts, "ModifiedLabel.dot");
 		}
-		
-		
-		
+		Set<String> compo = lts.getCompo();
+
+
 		HashMap<String, KeyWord> keyWords = makeKeyWords();
-		
+
 		Kripke k = new Kripke(lts, keyWords);
-		
+
 		Set<KeyWord> missing = new HashSet<KeyWord>();
-		HashMap<String, LTLProperty> properties = makeProperties(keyWords);
-		Set<String> param = k.getParameters();/////////////////////
+		HashMap<String, LTLProperty> properties = makeProperties(keyWords, compo);
+		Set<String> param = k.getParameters();
 		Set<LTLProperty> LTLmissing = new HashSet<LTLProperty>();
 		for (String k2: keyWords.keySet()) {
 			if (!param.contains(k2) & keyWords.get(k2).getNecessary() == 0) {
@@ -54,8 +55,8 @@ public class Main {
 				param.add(k2);
 			}*/
 		}
-		
-		
+
+
 		if (!missing.isEmpty()) {
 			System.out.println("following keywords are missing in the model:");
 			for (KeyWord k2: missing) {
@@ -67,16 +68,16 @@ public class Main {
 				properties.remove(ltl.getName());
 			}
 		}
-		
+
 		System.out.println("param :" + param);
-		
+
 		if (gen) {
 			GenerateDOT.printDot(k, "Kripke.dot");
 		}
-		
+
 		File out = new File(output);
 		KripkeToNuSMV.build(k, out, param, properties);
-		
+
 
 		/** TODO 
 		 * run NuSMV on the file generated
@@ -87,10 +88,13 @@ public class Main {
 		 */
 
 	}
-	
-	private static HashMap<String, LTLProperty> makeProperties(HashMap<String, KeyWord> keyWords){
+
+	private static HashMap<String, LTLProperty> makeProperties(HashMap<String, KeyWord> keyWords, Set<String> components){
 		HashMap<String, LTLProperty> properties = new HashMap<String, LTLProperty>();
 		File k = new File(ClassLoader.getSystemClassLoader().getResource("LTLproperties").getFile());
+		Set<String> dependencies = makeDep();
+		System.out.println("dep : " + dependencies);
+		System.out.println("compo : " + components);
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(k));
 			String line = br.readLine();
@@ -99,8 +103,25 @@ public class Main {
 				line = line.substring(line.indexOf(";;;") + 3);
 				String prop = line.substring(0, line.indexOf(";;;"));
 				String desc = line.substring(line.indexOf(";;;") + 3);
-				properties.put(name, new LTLProperty(name, prop, desc, keyWords));
+				if (prop.contains("*dep*")) {
+					if (!dependencies.isEmpty()){
+						for (String deps:dependencies) {
+							String prop2 = prop.replaceAll("[*]dep[*]", "\"" + deps + "\"");
+							properties.put(name + "(" + deps + ")", new LTLProperty(name + "(" + deps + ")", prop2, desc, keyWords));
+						}
+					}
+				}
+				else if (prop.contains("*compo*")) {
+					for (String compo : components) {
+						String prop2 = prop.replaceAll("[*]compo[*]", "\"" + compo + "\"");
+						properties.put(name + "(" + compo + ")", new LTLProperty(name + "(" + compo + ")", prop2, desc, keyWords));
+					}
+				}
+				else {
+					properties.put(name, new LTLProperty(name, prop, desc, keyWords));
+				}
 				line = br.readLine();
+
 			}
 
 			br.close();
@@ -110,7 +131,17 @@ public class Main {
 		}
 		return properties;
 	}
-	
+
+	private static Set<String> makeDep(){
+		Set<String> res = new HashSet<String>();
+		if (dep!=null) {
+			System.out.println (dep);
+			File file = new File(dep);
+			res = DAGmapper.mapping(file);
+		}
+		return res;
+	}
+
 	private static HashMap<String, KeyWord> makeKeyWords(){
 		HashMap<String, KeyWord> keyWords = new HashMap<String, KeyWord>();
 		File k = new File(ClassLoader.getSystemClassLoader().getResource("keyWords").getFile());

@@ -83,7 +83,7 @@ rule "authenticated"
 	$t1 : Transition(isReq() == true, contain("password", "pass", "pwd"))
 	$t2 : Transition(isReq() == false, isOk() == true, getSource() == $t1.getTarget()) 
 	then
-	$t2.addParameter("authenticated=TRUE");
+	$t2.addParameter("authenticated=" + $t2.getOtherCompo());
 end 
 
 rule "loginFail"

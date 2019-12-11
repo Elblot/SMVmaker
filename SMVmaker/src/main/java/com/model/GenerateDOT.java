@@ -58,7 +58,7 @@ public class GenerateDOT {
 				String label = st.getLabel();
 				out.println(label + "[label=" + label + ",shape=circle];");
 			}
-			out.println("S00 -> "+initialState.getLabel());
+			out.println("S00 -> " + initialState.getLabel());
 			for (Transition trs : lts.getTransitions()) {
 				String source = trs.getSource().getLabel();
 				String target = trs.getTarget().getLabel();
