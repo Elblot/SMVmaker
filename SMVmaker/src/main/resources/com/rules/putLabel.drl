@@ -12,7 +12,7 @@ end*/
 
 
 rule "initial"
-	when
+	when 
 	$t : Transition(source.isInit() == true)
 	then
 	$t.addParameter("initial=TRUE");
@@ -93,27 +93,28 @@ rule "loginFail"
 	$t1 : Transition(isReq() == true, contain("password", "pass", "pwd")))
 	$t2 : Transition(isReq() == false, isOk() == false, getSource() == $t1.getTarget()) 
 	then
-	$t2.addParameter("loginFail=TRUE");
+	$t2.addParameter("loginFail=" + $t2.getOtherCompo());
 end
 
 
-/*rule "lockout"  TODO
+rule "lockout"
 	when
-	
+	$t1 : Transition(isReq() == true, contain("password", "pass", "pwd"))
+	$t2 : Transition(isReq() == false, isOk() == false, getSource() == $t1.getTarget(), contain("locked", "account locked", "lockout")) 
 	then
-	
-end*/ 
+	$t2.addParameter("lockout=TRUE");
+end
 
 
-/*rule "passwordRecovery"  TODO
+rule "passwordRecovery" 
 	when
-	
+	$t : Transition(isReq() == true, isInput() == true, contain("forgotten password", "password recovery", "forget"))
 	then
-	
-end*/ 
+	$t.addParameter("passwordRecovery=TRUE");
+end
 
 
-/*rule "blackListedWords"  TODO
+/*rule "blackListedWords" 
 	when
 	
 	then
@@ -129,7 +130,31 @@ rule "input"
 end
 
 
-/*rule "errorMsg"  TODO
+rule "errorMsg" 
+	when
+	$t : Transition(isReq() == false, isOk() == false, contain("status", "error", "message"))
+	then
+	$t.addParameter("errorMsg=TRUE");
+end
+
+
+rule "OK" 
+	when
+	$t : Transition(isReq() == false, isOk() == true)
+	then
+	$t.addParameter("OK=TRUE");
+end 
+
+
+rule "NOK" 
+	when
+	$t : Transition(isReq() == false, isOk() == false)
+	then
+	$t.addParameter("NOK=TRUE");
+end
+
+
+/*rule "compromised" 
 	when
 	
 	then
@@ -137,39 +162,15 @@ end
 end*/ 
 
 
-/*rule "OK"  TODO
+rule "XSS" 
 	when
-	
+	$t : Transition(containXSS())
 	then
-	
-end*/ 
+	$t.addParameter("XSS=TRUE");
+end
 
 
-/*rule "NOK"  TODO
-	when
-	
-	then
-	
-end*/ 
-
-
-/*rule "compromised"  TODO
-	when
-	
-	then
-	
-end*/ 
-
-
-/*rule "XSS"  TODO
-	when
-	
-	then
-	
-end*/ 
-
-
-/*rule "sensitiveData"  TODO
+/*rule "sensitiveData" 
 	when
 	
 	then
@@ -185,9 +186,9 @@ rule "sendDataTo"
 end
 
 
-/*rule "receiveCommandSearchUpdate"  TODO
+rule "cmdSearchUpdate"
 	when
-	
+	$t : Transition(isReq() == true, contain("command", "cmd", "order"), contain("searchUpdate", "search_update"))
 	then
-	
-end*/ 
+	$t.addParameter("cmdSearchUpdate=TRUE");
+end

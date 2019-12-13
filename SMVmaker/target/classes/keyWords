@@ -5,7 +5,7 @@ searchUpdate|0|denote the component search for a new update|(1)the component can
 loginAttempt|0|denote an authentication attempt|(1)there is no authentication to exchange data with the component (2)the authentication phases are encrypted (3)there is no authentication in the log -> check if authentication needed to communicate with the component
 authenticated|1|denote the success of an authentication phase|this label cannot be missing in the system
 loginFail|0|denote the failure of an authentication phase|(1)there are no failure of authentication in the log -> check if authentication can fail
-lockout|0|the account id locked|(1) account cannot be locked (2) account are not locked in the -> check if authentication is weak against brute force attack
+lockout|1|the account id locked|(1) account cannot be locked (2) account are not locked in the log -> check if authentication is weak against brute force attack
 passwordRecovery|0|user try to recover a forgotten password|(1)user cannot recover forgotten password (2) user doesn't try to recover password in the log -> check if password recovery system(if it exist) doesn't give to much information about existing users
 blackListedWord|1|denote a black listed word in error message|this label cannot be missing in the system
 input|1|the message is an input|this label cannot be missing in the system

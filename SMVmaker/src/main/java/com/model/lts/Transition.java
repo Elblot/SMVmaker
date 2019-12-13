@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -171,7 +173,7 @@ public class Transition {
 		return label;
 	}
 
-	public boolean contain(String... strings) {
+	/*public boolean contain(String... strings) {
 		for (String param : oldParameters()) {
 			String leftpart = "";
 			String rightpart = "";
@@ -191,7 +193,19 @@ public class Transition {
 			}
 		}
 		return false;
-	}	
+	}	*/
+	
+	public boolean contain(String... strings) {
+		for (String param : oldParameters()) {
+			for (String word : strings) {
+				if (param.equals(word)) {
+					return true;
+				}
+				
+			}
+		}
+		return false;
+	}
 
 	private Set<String> oldParameters(){
 		Set<String> param = new HashSet<String>();
@@ -276,6 +290,15 @@ public class Transition {
 			return name.contains("=OK");
 		}
 		return false;
+	}
+	
+	public boolean containXSS() {
+		Pattern p = Pattern.compile("(javascript|vbscript|expression|applet|script|embed|object|iframe|frame|frameset)");
+		//Pattern p = Pattern.compile("((\\%3C)|<)((\\%2F)|\\/)*[a-z0-9\\%]+((\\%3E)|>)"); 
+		Matcher matcher = p.matcher(name);
+		//Matcher matcher = p.matcher("<script>alert('XSS')</script>");
+		System.out.println(matcher.find());
+		return matcher.find();
 	}
 
 }
