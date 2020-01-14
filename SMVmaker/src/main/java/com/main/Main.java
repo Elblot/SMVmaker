@@ -31,11 +31,14 @@ public class Main {
 		}
 		System.out.println(dir);
 		File input = new File(dir);
+		System.out.println("drool begin");
 		LTS lts = DroolsExec.runDrools(input, gen);
+		System.out.println("drools done");
 		if (gen) {
 			GenerateDOT.printDot(lts, "ModifiedLabel.dot");
 		}
 		Set<String> compo = lts.getCompo();
+		
 
 
 		HashMap<String, KeyWord> keyWords = makeKeyWords();

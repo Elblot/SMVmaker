@@ -1,5 +1,9 @@
 package com.model.lts;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -13,9 +17,12 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
 import com.auditability.auditability;
+import com.main.LTLProperty;
 
 public class Transition {
 
+	private String separator = "|||";
+	
 	private String name;
 	private String label;
 	private String[] parameters;
@@ -42,7 +49,7 @@ public class Transition {
 	}
 
 	public boolean isEncrypted() {
-		//System.out.println(this);
+		System.out.println("check encrypted");
 		String data = getData();
 		//System.out.println(data);
 		if (data.length() < 16) {
@@ -59,7 +66,6 @@ public class Transition {
 				bytes = Hex.decodeHex(data.toCharArray());
 				data = new String(bytes);
 			} catch (DecoderException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -102,19 +108,20 @@ public class Transition {
 	}
 
 	private String getData() {
+		
 		String data = "";
 		String event = parameters[0];
 		event = event.substring(event.indexOf("("), event.length() - 1);
 		while (!event.isEmpty()) {
 			String param = "";
-			if (event.contains(";")){
-				param = event.substring(0, event.indexOf(";")); //; is the separator
+			if (event.contains(separator)){
+				param = event.substring(0, event.indexOf(separator)); //; is the separator
 			}
 			else {
 				param = event;
 			}
 			event = event.replace(param, "");
-			event = event.replaceFirst(";", "");
+			event = event.replaceFirst(separator, "");
 			if (!param.contains("Host=") & !param.contains("Dest=") & !param.contains("Protocol=") & param.contains("=")) {
 				data = data + param.substring(param.indexOf("=")+1, param.length());
 			}
@@ -126,8 +133,8 @@ public class Transition {
 		String from = "none" ;
 		int d = trans.indexOf("Host=");
 		if (d != -1) {
-			if (trans.indexOf(";", d+5) > d) {
-				from = trans.substring(d + 5, trans.indexOf(";", d + 5));
+			if (trans.indexOf(separator, d+5) > d) {
+				from = trans.substring(d + 5, trans.indexOf(separator, d + 5));
 			}
 			else {
 				from = trans.substring(d + 5, trans.indexOf(")", d + 5));
@@ -140,8 +147,8 @@ public class Transition {
 		String to = "none" ;
 		int d = trans.indexOf("Dest=");
 		if (d != -1) {
-			if (trans.indexOf(";", d+5) > d) {
-				to = trans.substring(d + 5, trans.indexOf(";", d + 5));
+			if (trans.indexOf(separator, d+5) > d) {
+				to = trans.substring(d + 5, trans.indexOf(separator, d + 5));
 			}
 			else {
 				to = trans.substring(d + 5, trans.indexOf(")", d + 5));
@@ -196,12 +203,13 @@ public class Transition {
 	}	*/
 	
 	public boolean contain(String... strings) {
+		//System.out.println("check contain");
 		for (String param : oldParameters()) {
 			for (String word : strings) {
 				if (param.equals(word)) {
 					return true;
 				}
-				
+				//TODO
 			}
 		}
 		return false;
@@ -209,7 +217,7 @@ public class Transition {
 
 	private Set<String> oldParameters(){
 		Set<String> param = new HashSet<String>();
-		Collections.addAll(param, name.substring(name.indexOf("(")+1,name.lastIndexOf(")")).split(";", 0));
+		Collections.addAll(param, name.substring(name.indexOf("(")+1,name.lastIndexOf(")")).split(separator, 0));
 		return param;		
 	}
 
@@ -228,6 +236,7 @@ public class Transition {
 	}
 
 	public void addParameter(String newparam) {
+		//System.out.println("param added:" + newparam);
 		String[] newparameters = new String[parameters.length + 1];
 		for (int i = 0; i < parameters.length; ++i ) {
 			newparameters[i] = parameters[i];
@@ -268,6 +277,7 @@ public class Transition {
 	}
 
 	public boolean isInput() {
+		//System.out.println("check input");
 		return label.startsWith("?");
 	}
 	
@@ -292,13 +302,59 @@ public class Transition {
 		return false;
 	}
 	
+	
+	public boolean containSQL() {
+		return false; //TODO
+	}
+	
+	public boolean blackListed() {
+		File k = new File(ClassLoader.getSystemClassLoader().getResource("com/wordList/blackList").getFile());
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(k));
+			String line = br.readLine();
+			while (line != null) {
+				if (contain(line)) {
+					br.close();
+					return true;
+				}
+				line = br.readLine();
+			}
+			br.close();
+		}catch (IOException e) {
+			System.err.println("file src/main/resources/keyWords not found");
+			System.exit(3);
+		}
+		return false;
+	}
+	
+	public boolean sensitive() {
+		File k = new File(ClassLoader.getSystemClassLoader().getResource("com/wordList/sensitive").getFile());
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(k));
+			String line = br.readLine();
+			while (line != null) {
+				if (contain(line)) {
+					br.close();
+					return true;
+				}
+				line = br.readLine();
+			}
+			br.close();
+		}catch (IOException e) {
+			System.err.println("file src/main/resources/keyWords not found");
+			System.exit(3);
+		}
+		return false;
+	}
+	
 	public boolean containXSS() {
-		Pattern p = Pattern.compile("(javascript|vbscript|expression|applet|script|embed|object|iframe|frame|frameset)");
+		/*Pattern p = Pattern.compile("(javascript|vbscript|expression|applet|script|embed|object|iframe|frame|frameset)");
 		//Pattern p = Pattern.compile("((\\%3C)|<)((\\%2F)|\\/)*[a-z0-9\\%]+((\\%3E)|>)"); 
 		Matcher matcher = p.matcher(name);
 		//Matcher matcher = p.matcher("<script>alert('XSS')</script>");
 		System.out.println(matcher.find());
-		return matcher.find();
+		return matcher.find();*/
+		return contain("<script>alert(1)</script>","%3Cscript%3Ealert(1);%3C/script%3E");
 	}
 
 }

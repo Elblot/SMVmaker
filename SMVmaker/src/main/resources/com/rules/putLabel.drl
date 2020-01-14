@@ -26,14 +26,14 @@ rule "getUpdate"
 	$t.addParameter("getUpdate=TRUE");
 end
 
-
+/*
 rule "encrypted" 
 	when
 	$t : Transition(isEncrypted())
 	then
 	$t.addParameter("encrypted=TRUE");
 end 
-
+*/
 
 /*rule "signature" TODO but how?
 	when
@@ -77,6 +77,23 @@ rule "login3"
 	$t1.addParameter("loginAttempt=TRUE");
 end
 
+rule "authMega"
+	when
+	$t1 : Transition(isReq() == true, contain("Credential:"), !contain("keep-alive"))
+	$t2 : Transition(isReq() == false, isOk() == true, getSource() == $t1.getTarget())
+	then
+	$t1.addParameter("loginAttempt=TRUE");
+	$t2.addParameter("authenticated=" + $t2.getOtherCompo());
+end
+
+rule "loginfailMega"
+	when
+	$t1 : Transition(isReq() == true, contain("Credential:"), !contain("keep-alive"))
+	$t2 : Transition(isReq() == false, isOk() == false, getSource() == $t1.getTarget())
+	then
+	$t1.addParameter("loginAttempt=TRUE");
+	$t2.addParameter("loginfail=" + $t2.getOtherCompo());
+end
 
 rule "authenticated"  
 	when
@@ -114,12 +131,12 @@ rule "passwordRecovery"
 end
 
 
-/*rule "blackListedWords" 
+rule "blackListedWords" 
 	when
-	
+	$t : Transition(blackListed())
 	then
-	
-end*/ 
+	$t.addParameter("blackListedWord=TRUE");
+end
 
 
 rule "input"
@@ -130,12 +147,14 @@ rule "input"
 end
 
 
-rule "errorMsg" 
+
+/*rule "errorMsg" 
 	when
 	$t : Transition(isReq() == false, isOk() == false, contain("status", "error", "message"))
 	then
 	$t.addParameter("errorMsg=TRUE");
-end
+end*/
+
 
 
 rule "OK" 
@@ -154,6 +173,7 @@ rule "NOK"
 end
 
 
+
 /*rule "compromised" 
 	when
 	
@@ -170,12 +190,12 @@ rule "XSS"
 end
 
 
-/*rule "sensitiveData" 
+rule "sensitiveData" 
 	when
-	
+	$t : Transition(sensitive())
 	then
-	
-end*/ 
+	$t.addParameter("sensitive=TRUE");
+end
 
 
 rule "sendDataTo"
@@ -191,4 +211,28 @@ rule "cmdSearchUpdate"
 	$t : Transition(isReq() == true, contain("command", "cmd", "order"), contain("searchUpdate", "search_update"))
 	then
 	$t.addParameter("cmdSearchUpdate=TRUE");
+end
+
+
+rule "Request"
+	when
+	$t : Transition(isReq() == true)
+	then
+	$t.addParameter("Request=TRUE");
+end
+
+	
+rule "SQLinj"
+	when
+	$t : Transition(isReq() == true, containSQL() == true)
+	then
+	$t.addParameter("SQLinjection=TRUE");
+end
+
+
+rule "SQL"
+	when
+	$t : Transition(contain("Protocol=SQL"))
+	then
+	$t.addParameter("SQL=TRUE");
 end

@@ -29,12 +29,14 @@ public class DroolsExec {
 		KieSession kSession = kContainer.newKieSession("ksession-rules");
 		LTS lts = LTSmapper.mapping(input);
 		Set<Transition> transitions = lts.getTransitions();
-		//System.out.println(Arrays.deepToString(transitions.toArray()));
+		System.out.println("lts mapped");
+		//System.out.println(transitions.toString());
 		for (Transition t : transitions) {
 			kSession.insert(t);
 		}
+		System.out.println("launch rule:");
 		int fired = kSession.fireAllRules();
-		//System.out.println( "Number of modified Transitions = " + fired );
+		System.out.println( "Number of modified Transitions = " + fired );
 		//printArray(lts.getTransitions());//lts is transformed
 		
 		// TODO?? remove useless param in transitions

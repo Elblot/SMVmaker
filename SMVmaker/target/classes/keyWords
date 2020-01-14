@@ -1,7 +1,7 @@
 initial|1|An initial state, denote the potential beginning, so the end, of a new session|this label cannot be missing in the system
 getUpdate|0|denote the sending of a new update file|(1)The components cannot receive update (2)no update occurred in the log -> check if device can receive updates
 encrypted|1|denote the data are encrypted|this label cannot be missing in the system
-searchUpdate|0|denote the component search for a new update|(1)the component cannot search a new update (2) the component doesn't search for update in the log -> check if device can search for updates
+searchUpdate|0|denote the component search for a new update|(1)the component cannot search a new update (2)the component doesn't search for update in the log -> check if device can search for updates
 loginAttempt|0|denote an authentication attempt|(1)there is no authentication to exchange data with the component (2)the authentication phases are encrypted (3)there is no authentication in the log -> check if authentication needed to communicate with the component
 authenticated|1|denote the success of an authentication phase|this label cannot be missing in the system
 loginFail|0|denote the failure of an authentication phase|(1)there are no failure of authentication in the log -> check if authentication can fail
@@ -9,13 +9,14 @@ lockout|1|the account id locked|(1) account cannot be locked (2) account are not
 passwordRecovery|0|user try to recover a forgotten password|(1)user cannot recover forgotten password (2) user doesn't try to recover password in the log -> check if password recovery system(if it exist) doesn't give to much information about existing users
 blackListedWord|1|denote a black listed word in error message|this label cannot be missing in the system
 input|1|the message is an input|this label cannot be missing in the system
-errorMsg|0|an error message is present in the event|(1) no error messages are sent in the network (2)no error messages are present in the log -> check if error messages (if present) doesn't contain to much information (like credential, existing users,...)
 OK|1|the response is OK|this label cannot be missing in the system
 NOK|1|the response is not OK|this label cannot be missing in the system
 from|2|denote the source of the message |this label cannot be missing in the system
 to|2|denote the destination of the message|this label cannot be missing in the system
-compromised|0|compromised data are sent|(1) no compromised data are sent in the log -> check if the device is resistant to compromised data sent by other devices
 XSS|0|the request contain code injection|(1) the requests don't contain code injection in the log -> check if the web interface (if exists) is resistant to code injection
 sendDataTo|1|data are sent in the network, that is not for authentication|this label cannot be missing in the system
 sensitiveData|1|sensitive data are present in the message|this label cannot be missing in the system
 cmdSearchUpdate|1|the order is given to search for a new update|this label cannot be missing in the system
+Request|1|the message is a request|this label cannot be missing in the system
+SQLinjection|0|the message contains an SQL injection|(1)the system contains code injection that doesn't match the ones implemented (2)no SQl injection attempt was made during the log collection 
+SQL|0|the component communicate with a SQL database |(1)the component never call a SQL database

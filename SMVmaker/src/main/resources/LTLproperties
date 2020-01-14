@@ -8,5 +8,6 @@ GP-TM-42;;;(F (OK & to = *compo*) -> ((!(OK & to = *compo*) | login ) U (authent
 GP-TM-46/GP-TM-51;;; F TRUE  ;;;the component doesn't accept more than X connections at the same time, resistance to DoS
 GP-TM-48(1);;;!G(from = *dep* & NOK -> X initial) | G(from = *dep* & OK -> initial));;;if an other component is unavailable, this component stay available
 GP-TM-48(2);;;G((from = *dep* & compromised) -> X(NOK));;;if an other component send compromised data, this component doesn't accept these data
-GP-TM-52;;;G(XSS -> !X(OK & XSS));;; the component doesn't accept requests that contains code injection
-GP-TM-53;;;G(errorMsg -> !blackListedWord);;; error messages doesn't contain too much information
+GP-TM-52(1);;;G((Request & XSS) -> !X(OK & XSS));;; the component doesn't accept requests that contains XSS
+GP-TM-52(2);;;G(SQLinjection -> X(SQL & Request & X(SQL & OK))) ;;; the component doesn't accept requests that contains SQLinjection
+GP-TM-53;;;G(!Request -> !blackListedWord);;; error messages doesn't contain too much information
