@@ -29,11 +29,11 @@ public class Main {
 			System.err.println("pb option");
 			System.exit(3);
 		}
-		System.out.println(dir);
+		//System.out.println(dir);
 		File input = new File(dir);
-		System.out.println("drool begin");
+		//System.out.println("drool begin");
 		LTS lts = DroolsExec.runDrools(input, gen);
-		System.out.println("drools done");
+		//System.out.println("drools done");
 		if (gen) {
 			GenerateDOT.printDot(lts, "ModifiedLabel.dot");
 		}

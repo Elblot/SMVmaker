@@ -49,7 +49,7 @@ public class Transition {
 	}
 
 	public boolean isEncrypted() {
-		System.out.println("check encrypted");
+		//System.out.println("check encrypted");
 		String data = getData();
 		//System.out.println(data);
 		if (data.length() < 16) {
@@ -112,16 +112,19 @@ public class Transition {
 		String data = "";
 		String event = parameters[0];
 		event = event.substring(event.indexOf("("), event.length() - 1);
+		//System.out.println(event);
 		while (!event.isEmpty()) {
+			//System.out.println(event);
 			String param = "";
 			if (event.contains(separator)){
-				param = event.substring(0, event.indexOf(separator)); //; is the separator
+				param = event.substring(0, event.indexOf(separator));
 			}
 			else {
 				param = event;
 			}
 			event = event.replace(param, "");
-			event = event.replaceFirst(separator, "");
+			String reg = separator.replace("|", "\\|");
+			event = event.replaceFirst(reg, "");
 			if (!param.contains("Host=") & !param.contains("Dest=") & !param.contains("Protocol=") & param.contains("=")) {
 				data = data + param.substring(param.indexOf("=")+1, param.length());
 			}
@@ -206,7 +209,7 @@ public class Transition {
 		//System.out.println("check contain");
 		for (String param : oldParameters()) {
 			for (String word : strings) {
-				if (param.equals(word)) {
+				if (param.contains(word)) {
 					return true;
 				}
 				//TODO

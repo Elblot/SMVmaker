@@ -26,14 +26,14 @@ rule "getUpdate"
 	$t.addParameter("getUpdate=TRUE");
 end
 
-/*
+
 rule "encrypted" 
 	when
 	$t : Transition(isEncrypted())
 	then
 	$t.addParameter("encrypted=TRUE");
 end 
-*/
+
 
 /*rule "signature" TODO but how?
 	when
@@ -79,7 +79,7 @@ end
 
 rule "authMega"
 	when
-	$t1 : Transition(isReq() == true, contain("Credential:"), !contain("keep-alive"))
+	$t1 : Transition(isReq() == true, contain("Credentials:"), !contain("keep-alive"))
 	$t2 : Transition(isReq() == false, isOk() == true, getSource() == $t1.getTarget())
 	then
 	$t1.addParameter("loginAttempt=TRUE");
@@ -88,7 +88,7 @@ end
 
 rule "loginfailMega"
 	when
-	$t1 : Transition(isReq() == true, contain("Credential:"), !contain("keep-alive"))
+	$t1 : Transition(isReq() == true, contain("Credentials:"), !contain("keep-alive"))
 	$t2 : Transition(isReq() == false, isOk() == false, getSource() == $t1.getTarget())
 	then
 	$t1.addParameter("loginAttempt=TRUE");
@@ -217,7 +217,7 @@ end
 rule "Request"
 	when
 	$t : Transition(isReq() == true)
-	then
+	then 
 	$t.addParameter("Request=TRUE");
 end
 
