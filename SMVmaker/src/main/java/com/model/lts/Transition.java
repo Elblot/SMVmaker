@@ -58,6 +58,7 @@ public class Transition {
 		if (data.isEmpty()) {
 			return false;
 		}
+		//System.out.println("size: " + data.length() + ", data: " + data);
 		data = data.replaceAll(":", "");
 		data = data.replaceAll("\"", "");
 		if (isHex(data)) {
@@ -108,7 +109,6 @@ public class Transition {
 	}
 
 	private String getData() {
-		
 		String data = "";
 		String event = parameters[0];
 		event = event.substring(event.indexOf("("), event.length() - 1);
@@ -123,9 +123,12 @@ public class Transition {
 				param = event;
 			}
 			event = event.replace(param, "");
-			String reg = separator.replace("|", "\\|");
+			String reg = "\\Q" + separator + "\\E"; 
+			//String reg = separator.replaceAll("|", "\\|");
+			//System.out.println(separator + " " + reg);
 			event = event.replaceFirst(reg, "");
-			if (!param.contains("Host=") & !param.contains("Dest=") & !param.contains("Protocol=") & param.contains("=")) {
+			if (!param.contains("Host=") & !param.contains("Dest=") & !param.contains("Protocol=") & 
+					(param.contains("data=") || param.contains("body="))) {
 				data = data + param.substring(param.indexOf("=")+1, param.length());
 			}
 		}
@@ -208,6 +211,7 @@ public class Transition {
 	public boolean contain(String... strings) {
 		//System.out.println("check contain");
 		for (String param : oldParameters()) {
+			//System.out.println(param);
 			for (String word : strings) {
 				if (param.contains(word)) {
 					return true;
@@ -220,7 +224,8 @@ public class Transition {
 
 	private Set<String> oldParameters(){
 		Set<String> param = new HashSet<String>();
-		Collections.addAll(param, name.substring(name.indexOf("(")+1,name.lastIndexOf(")")).split(separator, 0));
+		String reg = "\\Q" + separator + "\\E";
+		Collections.addAll(param, name.substring(name.indexOf("(")+1,name.lastIndexOf(")")).split(reg, 0));
 		return param;		
 	}
 
@@ -300,7 +305,7 @@ public class Transition {
 
 	public boolean isOk() {
 		if (!isReq()) {
-			return name.contains("=OK");
+			return name.contains("=OK") || name.contains("status=0300");
 		}
 		return false;
 	}
@@ -357,7 +362,7 @@ public class Transition {
 		//Matcher matcher = p.matcher("<script>alert('XSS')</script>");
 		System.out.println(matcher.find());
 		return matcher.find();*/
-		return contain("<script>alert(1)</script>","%3Cscript%3Ealert(1);%3C/script%3E");
+		return contain("<script>alert(1);</script>","%3Cscript%3Ealert(1);%3C/script%3E","%3Cscript%3Ealert(1)%3B%3C%2Fscript%3E", "%3Cscript%3Ealert%281%29%3B%3C%2Fscript%3E");
 	}
 
 }

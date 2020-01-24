@@ -1,4 +1,5 @@
-initial|1|An initial state, denote the potential beginning, so the end, of a new session|this label cannot be missing in the system
+initial|1|An initial state, denote the potential beginning of a new session|this label cannot be missing in the system
+end|1|An initial state, denote the potential end, of a session|this label cannot be missing in the system
 getUpdate|0|denote the sending of a new update file|(1)The components cannot receive update (2)no update occurred in the log -> check if device can receive updates
 encrypted|1|denote the data are encrypted|this label cannot be missing in the system
 searchUpdate|0|denote the component search for a new update|(1)the component cannot search a new update (2)the component doesn't search for update in the log -> check if device can search for updates

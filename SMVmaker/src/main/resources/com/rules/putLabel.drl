@@ -18,12 +18,20 @@ rule "initial"
 	$t.addParameter("initial=TRUE");
 end
 
+rule "end"
+	when 
+	$t : Transition(target.isInit() == true)
+	then
+	$t.addParameter("end=TRUE");
+end
+
 
 rule "getUpdate"
 	when
-	$t : Transition(isInput(), contain("update", "firmware", "get-update", "get_update") )
+	$t1 : Transition(!isInput(), contain("get-update", "get_update") )
+	$t2 : Transition(isInput(), contain("data"), getSource() == $t1.getTarget())
 	then
-	$t.addParameter("getUpdate=TRUE");
+	$t2.addParameter("getUpdate=TRUE");
 end
 
 
@@ -45,7 +53,7 @@ end */
 
 rule "searchUpdate"
 	when
-	$t : Transition(isReq() == true, isInput() == false, contain("update", "findUpdate", "get_update", ""))
+	$t : Transition(isReq() == true, isInput() == false, contain("update", "findUpdate", "get_update"))
 	then
 	$t.addParameter("searchUpdate=TRUE");
 end
@@ -53,7 +61,7 @@ end
 
 rule "login" //TODO abstraire en une seule transition
 	when
-	$t1 : Transition(isReq() == true, contain("login", "user"))
+	$t1 : Transition(isReq() == true, contain("login", "user", "username"))
 	$t2 : Transition(isReq() == false, isOk() == true, getSource() == $t1.getTarget())
 	$t3 : Transition(isReq() == true, contain("password", "pass", "pwd"), getSource() == $t2.getTarget())
 	then
@@ -64,7 +72,7 @@ end
 
 rule "login2"
 	when
-	$t : Transition(isReq() == true, contain("login", "user"), contain("password", "pass", "pwd"))
+	$t : Transition(isReq() == true, contain("login", "user", "username"), contain("password", "pass", "pwd"))
 	then
 	$t.addParameter("loginAttempt=TRUE");
 end
@@ -77,9 +85,23 @@ rule "login3"
 	$t1.addParameter("loginAttempt=TRUE");
 end
 
+rule "logintls"
+	when
+	$t1 : Transition(isReq() == true, contain("Client Hello"))
+	$t2 : Transition(isReq() == false, getSource() == $t1.getTarget(), contain("Server Hello")) 
+	$t3 : Transition(isReq() == true, getSource() == $t2.getTarget(), contain("Encrypted Handshake Message")) 
+	$t4 : Transition(isReq() == false, getSource() == $t3.getTarget(), contain("Encrypted Handshake Message")) 
+	then
+	$t1.addParameter("loginAttempt=TRUE");
+	$t2.addParameter("loginAttempt=TRUE");
+	$t3.addParameter("loginAttempt=TRUE");
+	$t4.addParameter("authenticated=" + $t4.getOtherCompo());
+end
+
+
 rule "authMega"
 	when
-	$t1 : Transition(isReq() == true, contain("Credentials:"), !contain("keep-alive"))
+	$t1 : Transition(isReq() == true, contain("Credentials:"), !contain("Referer:"))
 	$t2 : Transition(isReq() == false, isOk() == true, getSource() == $t1.getTarget())
 	then
 	$t1.addParameter("loginAttempt=TRUE");
@@ -88,11 +110,11 @@ end
 
 rule "loginfailMega"
 	when
-	$t1 : Transition(isReq() == true, contain("Credentials:"), !contain("keep-alive"))
+	$t1 : Transition(isReq() == true, contain("Credentials:"), !contain("Referer:"))
 	$t2 : Transition(isReq() == false, isOk() == false, getSource() == $t1.getTarget())
 	then
 	$t1.addParameter("loginAttempt=TRUE");
-	$t2.addParameter("loginfail=" + $t2.getOtherCompo());
+	$t2.addParameter("loginFail=" + $t2.getOtherCompo());
 end
 
 rule "authenticated"  
@@ -181,20 +203,18 @@ end
 	
 end*/ 
 
-
-rule "XSS" 
+rule "XSS"  
 	when
 	$t : Transition(containXSS())
 	then
 	$t.addParameter("XSS=TRUE");
 end
 
-
 rule "sensitiveData" 
 	when
 	$t : Transition(sensitive())
 	then
-	$t.addParameter("sensitive=TRUE");
+	$t.addParameter("sensitiveData=TRUE");
 end
 
 
@@ -208,7 +228,7 @@ end
 
 rule "cmdSearchUpdate"
 	when
-	$t : Transition(isReq() == true, contain("command", "cmd", "order"), contain("searchUpdate", "search_update"))
+	$t : Transition(isReq() == true, isInput(), contain("command", "cmd", "order"), contain("searchUpdate", "search_update"))
 	then
 	$t.addParameter("cmdSearchUpdate=TRUE");
 end

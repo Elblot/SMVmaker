@@ -165,6 +165,16 @@ public class auditability {
 	public static boolean runEnt(String value) {
 		try {
 			/* run ent */
+			/*value = "23815578651917874f3a7e80df88cfccb7568a756abf203eeff9e8bcffaf331c";
+				try {
+					byte[] bytes;
+					bytes = Hex.decodeHex(value.toCharArray());
+					value = new String(bytes);
+				} catch (DecoderException e) {
+					e.printStackTrace();
+				}
+				
+				//////////////////////*/
 			String command = "ent"; 
 			Runtime run  = Runtime.getRuntime(); 
 
@@ -198,9 +208,9 @@ public class auditability {
 				System.out.println("Mean : " + mean);
 				System.out.println("Monte Carlo : " + carlo);
 				System.out.println("Serial Correlation : " + serial);*/
-			if (entropy > 7.9 | /*compression < 5 |*/ (chi < 90 & chi > 10) | 
+			if (entropy > 7.8 | /*compression < 5 |*/ (chi < 90 & chi > 10) | 
 					(mean < 129 & mean > 126) | /*(carlo < 3.18 & carlo > 3.10) |*/
-					(serial < 0.05 & serial > -0.05)) {
+					(serial < 0.08 & serial > -0.08)) {
 				//System.out.println(value);
 				//System.out.println(result);
 				return true;

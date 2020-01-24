@@ -20,13 +20,18 @@ public class KripkeToNuSMV {
 		try {
 			BufferedWriter br = new BufferedWriter(new FileWriter(output));
 			br.write("MODULE main\n");
+			System.out.println("begin writting");
 			br.write(makeVar(k, param));
+			System.out.println("param done");
 			br.write(makeInit(k, param));
+			System.out.println("init done");
 			br.write(makeTrans(k, param));
+			System.out.println("tran done");
 			br.write(makeLTL(properties, param));
+			System.out.println("done");
 			br.close();
 		}catch (IOException e) {
-			
+			System.err.println("Failed to write the smv file");
 		}
 	}
 	
@@ -108,6 +113,7 @@ public class KripkeToNuSMV {
 			}
 			res = res.substring(0, res.length() - 2);
 			res = res + ");\n\n";
+			//System.out.println("one trans:" + state.toString());
 		}		
 		res = res + "\t\tTRUE : FALSE;\n";
 		res = res + "\tesac\n";
