@@ -8,3 +8,5 @@ Generate an SMV file from a LTS in dot format, in order to verify some propertie
 - [ ] improve the description of scenario of absence of a key words.
 
 - [ ] parsing of the result from NuSMV and interpret them ?
+
+- [ ] empty model when no loop
