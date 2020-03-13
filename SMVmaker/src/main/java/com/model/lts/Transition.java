@@ -18,11 +18,12 @@ import org.apache.commons.codec.binary.Hex;
 
 import com.auditability.auditability;
 import com.main.LTLProperty;
+import com.utils.stringCleaner;
 
 public class Transition {
 
 	private String separator = "|||";
-	
+
 	private String name;
 	private String label;
 	private String[] parameters;
@@ -41,8 +42,8 @@ public class Transition {
 		label = trans.substring(0,trans.indexOf("("));
 		//parameters[0] = trans.substring(trans.indexOf("(")+1,trans.lastIndexOf(")"));//.split(";", 0);		
 		parameters[0] = "event=" + trans;// TODO remove char " if in the event
-		parameters[1] = "from=" + getFrom(trans);
-		parameters[2] = "to=" + getTo(trans);
+		parameters[1] = "from_" + stringCleaner.clean(getFrom(trans)) + "=TRUE";
+		parameters[2] = "to_" + stringCleaner.clean(getTo(trans)) + "=TRUE";
 		updateName();
 		source = src;
 		target = dst;
@@ -202,12 +203,12 @@ public class Transition {
 				if (leftpart.equals(word) | rightpart.equals(word)) {
 					return true;
 				}
-				
+
 			}
 		}
 		return false;
 	}	*/
-	
+
 	public boolean contain(String... strings) {
 		//System.out.println("check contain");
 		for (String param : oldParameters()) {
@@ -216,16 +217,28 @@ public class Transition {
 				if (param.contains(word)) {
 					return true;
 				}
-				//TODO
 			}
 		}
 		return false;
+	}
+
+	public HashSet<String> contain2(String... strings) {
+		HashSet<String> res = new HashSet<String>();
+		for (String param : oldParameters()) {
+			for (String word : strings) {
+				if (param.contains(word)) {
+					res.add(param);
+				}
+			}
+		}
+		return res;
 	}
 
 	private Set<String> oldParameters(){
 		Set<String> param = new HashSet<String>();
 		String reg = "\\Q" + separator + "\\E";
 		Collections.addAll(param, name.substring(name.indexOf("(")+1,name.lastIndexOf(")")).split(reg, 0));
+		//System.out.println(name.substring(name.indexOf("(")+1,name.lastIndexOf(")")));
 		return param;		
 	}
 
@@ -288,7 +301,7 @@ public class Transition {
 		//System.out.println("check input");
 		return label.startsWith("?");
 	}
-	
+
 	/* return the name of the component that communicate with the one modeled */
 	public String getOtherCompo() {
 		if (isInput()) {
@@ -298,7 +311,7 @@ public class Transition {
 			return getTo(name);
 		}
 	}
-	
+
 	public boolean isReq() {
 		return !name.contains("esponse");
 	}
@@ -309,60 +322,90 @@ public class Transition {
 		}
 		return false;
 	}
-	
-	
+
+
 	public boolean containSQL() {
 		return false; //TODO
 	}
-	
-	public boolean blackListed() {
+
+	public HashSet<String> blackListed() {
+		HashSet<String> res = new HashSet<String>();
 		File k = new File(ClassLoader.getSystemClassLoader().getResource("com/wordList/blackList").getFile());
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(k));
 			String line = br.readLine();
 			while (line != null) {
-				if (contain(line)) {
-					br.close();
-					return true;
+				for (String param : oldParameters()) {
+					if (param.contains(line)) {
+						//br.close();
+						res.add(param);
+						//return true;
+					}
 				}
 				line = br.readLine();
 			}
 			br.close();
 		}catch (IOException e) {
-			System.err.println("file src/main/resources/keyWords not found");
+			System.err.println("problem with blacklisted file");
 			System.exit(3);
 		}
-		return false;
+		return res;//false;
 	}
-	
-	public boolean sensitive() {
+
+	public HashSet<String> sensitive() {
 		File k = new File(ClassLoader.getSystemClassLoader().getResource("com/wordList/sensitive").getFile());
+		HashSet<String> res = new HashSet<String>();
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(k));
 			String line = br.readLine();
 			while (line != null) {
-				if (contain(line)) {
-					br.close();
-					return true;
+				for (String param: oldParameters()) {
+					if (param.contains(line)) {
+						//br.close();
+						res.add(param);
+						//return true;
+					}
 				}
 				line = br.readLine();
 			}
 			br.close();
 		}catch (IOException e) {
-			System.err.println("file src/main/resources/keyWords not found");
+			System.err.println("problems with sensitive file");
 			System.exit(3);
 		}
-		return false;
+		return res;//false;
+	}
+
+	public String getUpdate() {
+		String res = "";
+		for (String param : oldParameters()) {
+			if (param.contains("get-update") |
+				param.contains("get_update") |
+				param.contains("data") ) {
+				res = param;
+			}
+		}
+		return res;
 	}
 	
-	public boolean containXSS() {
+	public HashSet<String> containXSS() {
+		HashSet<String> res = new HashSet<String>();
+		for (String param: oldParameters()) {
+			if (param.contains("<script>alert(1);</script>") |
+					param.contains("%3Cscript%3Ealert(1);%3C/script%3E") |
+					param.contains("%3Cscript%3Ealert(1)%3B%3C%2Fscript%3E") |
+					param.contains("%3Cscript%3Ealert%281%29%3B%3C%2Fscript%3E")) {
+				res.add(param);
+
+			}
+		}
 		/*Pattern p = Pattern.compile("(javascript|vbscript|expression|applet|script|embed|object|iframe|frame|frameset)");
 		//Pattern p = Pattern.compile("((\\%3C)|<)((\\%2F)|\\/)*[a-z0-9\\%]+((\\%3E)|>)"); 
 		Matcher matcher = p.matcher(name);
 		//Matcher matcher = p.matcher("<script>alert('XSS')</script>");
 		System.out.println(matcher.find());
 		return matcher.find();*/
-		return contain("<script>alert(1);</script>","%3Cscript%3Ealert(1);%3C/script%3E","%3Cscript%3Ealert(1)%3B%3C%2Fscript%3E", "%3Cscript%3Ealert%281%29%3B%3C%2Fscript%3E");
+		return res; //contain("<script>alert(1);</script>","%3Cscript%3Ealert(1);%3C/script%3E","%3Cscript%3Ealert(1)%3B%3C%2Fscript%3E", "%3Cscript%3Ealert%281%29%3B%3C%2Fscript%3E");
 	}
 
 }

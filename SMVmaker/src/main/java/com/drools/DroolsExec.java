@@ -24,6 +24,7 @@ public class DroolsExec {
 	 * run drools in order to put new labels in the transitions
 	 */
 	public static final LTS runDrools(File input, boolean gen) {
+		
 		KieServices ks = KieServices.Factory.get();
 		KieContainer kContainer = ks.getKieClasspathContainer();
 		KieSession kSession = kContainer.newKieSession("ksession-rules");

@@ -1,6 +1,8 @@
 package com.sample.rules
 
 import com.model.lts.Transition;
+import com.utils.stringCleaner;
+import com.main.Main;
 
 /*rule "modify a transition"
  	when
@@ -10,30 +12,32 @@ import com.model.lts.Transition;
    	$t.setName($t.getName() + "boo");
 end*/
 
-
-rule "initial"
+rule "begin"
 	when 
 	$t : Transition(source.isInit() == true)
 	then
-	$t.addParameter("initial=TRUE");
+	//System.out.println("begin");
+	$t.addParameter("begin=TRUE");
 end
 
 rule "end"
 	when 
 	$t : Transition(target.isInit() == true)
 	then
+	//System.out.println("end");
 	$t.addParameter("end=TRUE");
 end
-
 
 rule "getUpdate"
 	when
 	$t1 : Transition(!isInput(), contain("get-update", "get_update") )
 	$t2 : Transition(isInput(), contain("data"), getSource() == $t1.getTarget())
 	then
-	$t2.addParameter("getUpdate=TRUE");
+	//System.out.println("getUpdate");
+	$t2.addParameter("getUpdate_" + stringCleaner.clean($t2.getUpdate()) + "=TRUE");
+	//System.out.println("you can write code in the drool file");
+	Main.keyWords.get("getUpdate_d").addValue(stringCleaner.clean($t2.getUpdate()));
 end
-
 
 rule "encrypted" 
 	when
@@ -42,7 +46,6 @@ rule "encrypted"
 	$t.addParameter("encrypted=TRUE");
 end 
 
-
 /*rule "signature" TODO but how?
 	when
 	
@@ -50,14 +53,24 @@ end
 	
 end */
 
-
-rule "searchUpdate"
+/*rule "searchUpdate"
 	when
 	$t : Transition(isReq() == true, isInput() == false, contain("update", "findUpdate", "get_update"))
 	then
+	//System.out.println("searchUpdate");
 	$t.addParameter("searchUpdate=TRUE");
-end
+end*/
 
+rule "searchUpdate"
+	when
+	$t : Transition(isReq() == true, isInput() == false, !contain2("updatefile", "findUpdate", "get_update").isEmpty())
+	then
+	//System.out.println("searchUpdate");
+	for (String param: $t.contain2("update", "findUpdate", "get_update")){
+		$t.addParameter("searchUpdate_"+ stringCleaner.clean(param) + "=TRUE");
+		Main.keyWords.get("searchUpdate_d").addValue(stringCleaner.clean(param));
+	}
+end
 
 rule "login" //TODO abstraire en une seule transition
 	when
@@ -65,16 +78,20 @@ rule "login" //TODO abstraire en une seule transition
 	$t2 : Transition(isReq() == false, isOk() == true, getSource() == $t1.getTarget())
 	$t3 : Transition(isReq() == true, contain("password", "pass", "pwd"), getSource() == $t2.getTarget())
 	then
-	$t1.addParameter("loginAttempt=TRUE");
-	$t2.addParameter("loginAttempt=TRUE");
-	$t3.addParameter("loginAttempt=TRUE");
+	//System.out.println("login");
+	$t1.addParameter("loginAttempt_" + stringCleaner.clean($t2.getOtherCompo()) + "=TRUE");
+	$t2.addParameter("loginAttempt_" + stringCleaner.clean($t2.getOtherCompo()) + "=TRUE");
+	$t3.addParameter("loginAttempt_" + stringCleaner.clean($t2.getOtherCompo()) + "=TRUE");
+	Main.keyWords.get("loginAttempt_c").addValue(stringCleaner.clean($t2.getOtherCompo()));
 end
 
 rule "login2"
 	when
 	$t : Transition(isReq() == true, contain("login", "user", "username"), contain("password", "pass", "pwd"))
 	then
-	$t.addParameter("loginAttempt=TRUE");
+	//System.out.println("blogin2");
+	$t.addParameter("loginAttempt_" + stringCleaner.clean($t.getOtherCompo()) + "=TRUE");
+	Main.keyWords.get("loginAttempt_c").addValue(stringCleaner.clean($t.getOtherCompo()));
 end
 
 rule "login3"
@@ -82,7 +99,9 @@ rule "login3"
 	$t1 : Transition(isReq() == true, contain("login", "user"))
 	$t2 : Transition(isReq() == false, isOk() == false, getSource() == $t1.getTarget()) 
 	then
-	$t1.addParameter("loginAttempt=TRUE");
+	//System.out.println("login3");
+	$t1.addParameter("loginAttempt_" + stringCleaner.clean($t2.getOtherCompo()) + "=TRUE");
+	Main.keyWords.get("loginAttempt_c").addValue(stringCleaner.clean($t2.getOtherCompo()));
 end
 
 rule "logintls"
@@ -92,20 +111,25 @@ rule "logintls"
 	$t3 : Transition(isReq() == true, getSource() == $t2.getTarget(), contain("Encrypted Handshake Message")) 
 	$t4 : Transition(isReq() == false, getSource() == $t3.getTarget(), contain("Encrypted Handshake Message")) 
 	then
-	$t1.addParameter("loginAttempt=TRUE");
-	$t2.addParameter("loginAttempt=TRUE");
-	$t3.addParameter("loginAttempt=TRUE");
-	$t4.addParameter("authenticated=" + $t4.getOtherCompo());
+	//System.out.println("logintls");
+	$t1.addParameter("loginAttempt_" + stringCleaner.clean($t4.getOtherCompo()) + "=TRUE");
+	$t2.addParameter("loginAttempt_" + stringCleaner.clean($t4.getOtherCompo()) + "=TRUE");
+	$t3.addParameter("loginAttempt_" + stringCleaner.clean($t4.getOtherCompo()) + "=TRUE");
+	Main.keyWords.get("loginAttempt_c").addValue(stringCleaner.clean($t4.getOtherCompo()));
+	$t4.addParameter("authenticated_" + stringCleaner.clean($t4.getOtherCompo()) + "=TRUE");
+	Main.keyWords.get("authenticated_c").addValue(stringCleaner.clean($t4.getOtherCompo()));
 end
-
 
 rule "authMega"
 	when
 	$t1 : Transition(isReq() == true, contain("Credentials:"), !contain("Referer:"))
 	$t2 : Transition(isReq() == false, isOk() == true, getSource() == $t1.getTarget())
 	then
-	$t1.addParameter("loginAttempt=TRUE");
-	$t2.addParameter("authenticated=" + $t2.getOtherCompo());
+	//System.out.println("authmega");
+	$t1.addParameter("loginAttempt_" + stringCleaner.clean($t2.getOtherCompo()) + "=TRUE");
+	Main.keyWords.get("loginAttempt_c").addValue(stringCleaner.clean($t2.getOtherCompo()));
+	$t2.addParameter("authenticated_" + stringCleaner.clean($t2.getOtherCompo()) + "=TRUE");
+	Main.keyWords.get("authenticated_c").addValue(stringCleaner.clean($t2.getOtherCompo()));
 end
 
 rule "loginfailMega"
@@ -113,8 +137,11 @@ rule "loginfailMega"
 	$t1 : Transition(isReq() == true, contain("Credentials:"), !contain("Referer:"))
 	$t2 : Transition(isReq() == false, isOk() == false, getSource() == $t1.getTarget())
 	then
-	$t1.addParameter("loginAttempt=TRUE");
-	$t2.addParameter("loginFail=" + $t2.getOtherCompo());
+	//System.out.println("loginfailmega");
+	$t1.addParameter("loginAttempt_" + stringCleaner.clean($t2.getOtherCompo()) + "=TRUE");
+	Main.keyWords.get("loginAttempt_c").addValue(stringCleaner.clean($t2.getOtherCompo()));
+	$t2.addParameter("loginFail_" + stringCleaner.clean($t2.getOtherCompo()) + "=TRUE");
+	Main.keyWords.get("loginFail_c").addValue(stringCleaner.clean($t2.getOtherCompo()));
 end
 
 rule "authenticated"  
@@ -122,7 +149,9 @@ rule "authenticated"
 	$t1 : Transition(isReq() == true, contain("password", "pass", "pwd"))
 	$t2 : Transition(isReq() == false, isOk() == true, getSource() == $t1.getTarget()) 
 	then
-	$t2.addParameter("authenticated=" + $t2.getOtherCompo());
+	//System.out.println("authneticatesd");
+	$t2.addParameter("authenticated_" + stringCleaner.clean($t2.getOtherCompo()) + "=TRUE");
+	Main.keyWords.get("authenticated_c").addValue(stringCleaner.clean($t2.getOtherCompo()));
 end 
 
 rule "loginFail"
@@ -132,104 +161,94 @@ rule "loginFail"
 	$t1 : Transition(isReq() == true, contain("password", "pass", "pwd")))
 	$t2 : Transition(isReq() == false, isOk() == false, getSource() == $t1.getTarget()) 
 	then
-	$t2.addParameter("loginFail=" + $t2.getOtherCompo());
+	//System.out.println("loginFail");
+	$t2.addParameter("loginFail_" + stringCleaner.clean($t2.getOtherCompo()) + "=TRUE");
+	Main.keyWords.get("loginFail_c").addValue(stringCleaner.clean($t2.getOtherCompo()));
 end
-
 
 rule "lockout"
 	when
 	$t1 : Transition(isReq() == true, contain("password", "pass", "pwd"))
 	$t2 : Transition(isReq() == false, isOk() == false, getSource() == $t1.getTarget(), contain("locked", "account locked", "lockout")) 
 	then
-	$t2.addParameter("lockout=TRUE");
+	//System.out.println("lockout");
+	$t2.addParameter("lockout_" + stringCleaner.clean($t2.getOtherCompo()) + "=TRUE");
+	Main.keyWords.get("lockout_c").addValue(stringCleaner.clean($t2.getOtherCompo()));
 end
-
 
 rule "passwordRecovery" 
 	when
 	$t : Transition(isReq() == true, isInput() == true, contain("forgotten password", "password recovery", "forget"))
 	then
+	//System.out.println("poassword recovery");
 	$t.addParameter("passwordRecovery=TRUE");
 end
 
-
+/*rule "blackListedWords" ////
+	when
+	$t : Transition(!blackListed().isEmpty())
+	then
+	for (String param: $t.blackListed()){
+		$t.addParameter("blackListedWord_" + stringCleaner.clean(param) + "=TRUE");
+		Main.keyWords.get("blackListedWord_d").addValue(stringCleaner.clean(param));
+	}
+end
+*/
 rule "blackListedWords" 
 	when
-	$t : Transition(blackListed())
+	$t : Transition(!blackListed().isEmpty())
 	then
-	$t.addParameter("blackListedWord=TRUE");
+	$t.addParameter("blackListedWords=TRUE");
 end
-
-
 rule "input"
 	when
 	$t : Transition(isInput())
 	then
+	//System.out.println("input");
 	$t.addParameter("input=TRUE");
 end
 
-
-
-/*rule "errorMsg" 
+rule "output"
 	when
-	$t : Transition(isReq() == false, isOk() == false, contain("status", "error", "message"))
+	$t : Transition(!isInput())
 	then
-	$t.addParameter("errorMsg=TRUE");
-end*/
+	//System.out.println("output");
+	$t.addParameter("output=TRUE");
+end
 
-
-
-rule "OK" 
-	when
-	$t : Transition(isReq() == false, isOk() == true)
-	then
-	$t.addParameter("OK=TRUE");
-end 
-
-
-rule "NOK" 
+rule "errorResponse" 
 	when
 	$t : Transition(isReq() == false, isOk() == false)
 	then
-	$t.addParameter("NOK=TRUE");
+	//System.out.println("errorrespo");
+	$t.addParameter("errorResponse=TRUE");
+end 
+
+rule "XSS"  //////
+	when
+	$t : Transition(isReq(), !containXSS().isEmpty)
+	then
+	for (String param: $t.containXSS()){
+		$t.addParameter("XSS_" + stringCleaner.clean(param) + "=TRUE");
+		Main.keyWords.get("XSS_d").addValue(stringCleaner.clean(param));
+	}
 end
 
-
-
-/*rule "compromised" 
+rule "sensitive"
 	when
-	
+	$t : Transition(!sensitive().isEmpty())
 	then
-	
-end*/ 
-
-rule "XSS"  
-	when
-	$t : Transition(containXSS())
-	then
-	$t.addParameter("XSS=TRUE");
+	for (String param: $t.sensitive()){
+		$t.addParameter("sensitive_" + stringCleaner.clean(param) + "=TRUE");
+		Main.keyWords.get("sensitive_d").addValue(stringCleaner.clean(param));
+	}
 end
-
-rule "sensitiveData" 
-	when
-	$t : Transition(sensitive())
-	then
-	$t.addParameter("sensitiveData=TRUE");
-end
-
-
-rule "sendDataTo"
-	when
-	$t : Transition(isReq() == true, !isInput(), !contain("login", "user", "password", "pass", "pwd"))
-	then
-	$t.addParameter("sendDataTo=" + $t.getOtherCompo());
-end
-
 
 rule "cmdSearchUpdate"
 	when
 	$t : Transition(isReq() == true, isInput(), contain("command", "cmd", "order"), contain("searchUpdate", "search_update"))
 	then
+	//System.out.println("cmdsearchup");
 	$t.addParameter("cmdSearchUpdate=TRUE");
 end
 
@@ -238,7 +257,16 @@ rule "Request"
 	when
 	$t : Transition(isReq() == true)
 	then 
-	$t.addParameter("Request=TRUE");
+	//System.out.println("req");
+	$t.addParameter("request=TRUE");
+end
+
+rule "Response"
+	when
+	$t : Transition(isReq() == false)
+	then 
+	//System.out.println("resp");
+	$t.addParameter("response=TRUE");
 end
 
 	
@@ -246,13 +274,38 @@ rule "SQLinj"
 	when
 	$t : Transition(isReq() == true, containSQL() == true)
 	then
+	//System.out.println("sqlinj");
 	$t.addParameter("SQLinjection=TRUE");
 end
 
-
-rule "SQL"
+rule "Unavailable"
 	when
-	$t : Transition(contain("Protocol=SQL"))
+	$t : Transition(isReq() == false, contain("504", "time-out"))
 	then
-	$t.addParameter("SQL=TRUE");
+	$t.addParameter("unavailable=TRUE");
 end
+
+rule "Credential"
+	when
+	$t : Transition(!contain2("Credential", "login", "password").isEmpty())
+	then
+	for (String param: $t.contain2("Credential", "login", "password")){
+		$t.addParameter("credential_" + stringCleaner.clean(param) + "=TRUE");
+		Main.keyWords.get("credential_d").addValue(stringCleaner.clean(param));
+	}
+end
+
+/* not needed 
+rule "from"
+	when
+	
+	then
+	
+end
+
+rule "to"
+	when
+	
+	then
+	
+end*/

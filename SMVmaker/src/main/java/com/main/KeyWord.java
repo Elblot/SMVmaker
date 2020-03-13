@@ -6,18 +6,20 @@ import java.util.Set;
 public class KeyWord {
 	
 	private String name;
-	private int necessary;
+	private int bool;
 	private String description;
 	private String scenario;
 	private Set<LTLProperty> links;
+	private Set<String> values;
 	
-	public KeyWord(String name, int necessary, String description, String scenario) {
-		if (necessary != 0 & necessary != 1 & necessary != 2 ) {
-			System.err.println("keyWord: " + name + ", \"necessary\" field must contains 0, 1, or 2.");
+	public KeyWord(String name, int bool, String description, String scenario) {
+		if (bool != 0 & bool != 1) {
+			System.err.println("keyWord: " + name + ", \"bool\" field must contains 0 or 1.");
 			System.exit(1);
 		}
+		values = new HashSet<String>();
 		this.setName(name);
-		this.setNecessary(necessary);
+		this.setBool(bool);
 		this.setDescription(description);
 		this.setScenario(scenario);
 		links = new HashSet<LTLProperty>();
@@ -31,12 +33,20 @@ public class KeyWord {
 		return links;
 	}
 	
+	public void addValue(String value) {
+		values.add(value);
+	}
+	
+	public Set<String> getValues() {
+		return values;
+	}
+	
 	public void addLinks(LTLProperty ltl) {
 		links.add(ltl);
 	}
 	
 	public String toString() {
-		return "name = " + getName() + "; necessary = " + necessary + "; description = " + description + "; scenario = " + scenario + "; linked to: " + links;//TODO link tostring
+		return "name = " + getName() + "; boolean = " + bool + "; description = " + description + "; scenario = " + scenario + "; possible value: " + values.toString() + "\n";//TODO link tostring
 	}
 
 	public String getName() {
@@ -47,12 +57,12 @@ public class KeyWord {
 		this.name = name;
 	}
 
-	public int getNecessary() {
-		return necessary;
+	public int getBool() {
+		return bool;
 	}
 
-	public void setNecessary(int necessary) {
-		this.necessary = necessary;
+	public void setBool(int bool) {
+		this.bool = bool;
 	}
 
 	public String getDescription() {

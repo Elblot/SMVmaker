@@ -63,17 +63,17 @@ public class Kripke {
 			}
 		}
 		makeParameters(keyWords);
-		transformLabels();
+		transformLabels(keyWords);
 	}
 
 	/*
 	 * transform the label for NuSMV
 	 * TODO
 	 */
-	private void transformLabels(){
+	private void transformLabels(HashMap<String, KeyWord> keyWords){
 		//Set<String> keyWords = getParameters();
 		for (StateK st : getStates()) {
-			st.transformLabel(parameters);
+			st.transformLabel(parameters, keyWords);
 		}
 		//System.out.println(keyWords);
 	}
@@ -94,7 +94,7 @@ public class Kripke {
 			}
 		}
 		for (String param: keyWords.keySet()) {
-			if (keyWords.get(param).getNecessary() == 1) {
+			if (!param.contains("_")) {
 				this.parameters.add(param);
 			}
 		}
@@ -129,7 +129,10 @@ public class Kripke {
 		}
 		Set<String> res = new HashSet<String>();
 		for (StateK state: states) {
-			res.add(state.getValue(param));
+			String val = state.getValue(param);
+			if (val != null) {
+				res.add(val);
+			}
 		}
 
 

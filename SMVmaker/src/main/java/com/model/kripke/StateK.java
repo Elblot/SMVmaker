@@ -1,8 +1,11 @@
 package com.model.kripke;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.main.KeyWord;
 
 public class StateK {
 
@@ -42,6 +45,7 @@ public class StateK {
 	}
 
 	public String getValue(String parameter) {
+		//HashSet<String> val = new HashSet<String>();
 		for (String param: parameters) {
 				String leftpart = "";
 				String rightpart = "";
@@ -53,11 +57,12 @@ public class StateK {
 					System.err.println("param have to contain a \"=\"");
 				}
 				if (parameter.equals(leftpart)) {
+					//val.add(rightpart.replaceAll("\"", ""));
 					return rightpart.replaceAll("\"", "");
 				}
 		}
-		System.err.println("stateK : " + this.toString() + "doesn't contain the parameter :" + parameter);
-		return null;
+		//System.err.println("stateK : " + this.toString() + "doesn't contain the parameter :" + parameter);
+		return "FALSE";
 	}
 		
 	public void setInit() {
@@ -72,7 +77,7 @@ public class StateK {
 		return getParameters().equals(st.getParameters());
 	}
 	
-	public void transformLabel(Set<String> keyWords) {
+	public void transformLabel(Set<String> kparams, HashMap<String, KeyWord> keyWord) {
 		Set<String> list = new HashSet<String>();
 		for (String param: parameters) {
 			String leftpart = "";
@@ -84,15 +89,16 @@ public class StateK {
 			}
 			list.add(leftpart);
 		}
-		Set<String> save = new HashSet<String>(keyWords);
+		Set<String> save = new HashSet<String>(kparams);
 		save.removeAll(list);
 		for (String param: save) {
-			if (param.equals("authenticated") | param.equals("sendDataTo") | param.equals("loginFail")) { //TODO automating the detection of non-boolean
+			//System.out.println(param);
+			/*if (!param.equals("state") & !param.equals("event") && keyWord.get(param.substring(0,param.indexOf("_"))).getBool() == 0) { //TODO automating the detection of non-boolean
 				parameters.add(param + "=NULL");
 			}
-			else {
+			else {*/
 				parameters.add(param + "=FALSE");
-			}
+			//}
 		}
 	}
 	

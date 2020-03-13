@@ -19,7 +19,6 @@ public class LTLProperty {
 				keywords.get(key).addLinks(this);
 			}
 		}
-		// TODO check if each keyword in the property exists
 	}
 	
 	public String getName() {
