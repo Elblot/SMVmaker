@@ -6,27 +6,22 @@ import java.util.Set;
 public class KeyWord {
 	
 	private String name;
-	private int bool;
+	//private int bool;
 	private String description;
 	private String scenario;
 	private Set<LTLProperty> links;
 	private Set<String> values;
 	
-	public KeyWord(String name, int bool, String description, String scenario) {
-		if (bool != 0 & bool != 1) {
-			System.err.println("keyWord: " + name + ", \"bool\" field must contains 0 or 1.");
-			System.exit(1);
-		}
+	public KeyWord(String name, String description, String scenario) {
 		values = new HashSet<String>();
 		this.setName(name);
-		this.setBool(bool);
 		this.setDescription(description);
 		this.setScenario(scenario);
 		links = new HashSet<LTLProperty>();
 	}
 	
-	public KeyWord(String name, int necessary) {
-		new KeyWord(name, necessary, "", "");
+	public KeyWord(String name) {
+		new KeyWord(name, "", "");
 	}
 	
 	public Set<LTLProperty> getLinks() {
@@ -46,7 +41,7 @@ public class KeyWord {
 	}
 	
 	public String toString() {
-		return "name = " + getName() + "; boolean = " + bool + "; description = " + description + "; scenario = " + scenario + "; possible value: " + values.toString() + "\n";//TODO link tostring
+		return "name = " + getName() + "; description = " + description + "; scenario = " + scenario + "; possible value: " + values.toString() + "\n";//TODO link tostring
 	}
 
 	public String getName() {
@@ -55,14 +50,6 @@ public class KeyWord {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public int getBool() {
-		return bool;
-	}
-
-	public void setBool(int bool) {
-		this.bool = bool;
 	}
 
 	public String getDescription() {

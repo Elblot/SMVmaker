@@ -241,15 +241,15 @@ public class Main {
 			while (line != null) {
 				String name = line.substring(0, line.indexOf("|"));
 				line = line.substring(line.indexOf("|") + 1);
-				int necessary = Integer.valueOf(line.substring(0, line.indexOf("|")));
-				line = line.substring(line.indexOf("|") + 1);
 				if (line.contains("|")) {
 					String description = line.substring(0, line.indexOf("|"));
-					String scenario = line.substring(line.indexOf("|") + 1);
-					keyWords.put(name, new KeyWord(name, necessary, description, scenario));
+					if (line.contains("|")) {
+						String scenario = line.substring(line.indexOf("|") + 1);
+						keyWords.put(name, new KeyWord(name, description, scenario));
+					}
 				}
 				else {
-					keyWords.put(name, new KeyWord(name, necessary));
+					keyWords.put(name, new KeyWord(name));
 				}
 				line = br.readLine();
 			}

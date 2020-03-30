@@ -1,25 +1,25 @@
-begin|1|An initial state, denote the potential beginning of a new session|this label cannot be missing in the system
-end|1|An initial state, denote the potential end, of a session|this label cannot be missing in the system
-from_c|0|denote the source of the message |this label cannot be missing in the system
-to_c|0|denote the destination of the message|this label cannot be missing in the system
-request|1|the message is a request|this label cannot be missing in the system
-response|1|the message is a response|this label cannot be missing in the system
-input|1|the message is an input|this label cannot be missing in the system
-output|1|the message is an output|this label cannot be missing in the system
-getUpdate_d|0|denote the sending of a new update file|(1)The components cannot receive update (2)no update occurred in the log -> check if device can receive updates
-cmdSearchUpdate|1|the order is given to search for a new update|this label cannot be missing in the system
-sensitive_d|0|sensitive data are present in the message|this label cannot be missing in the system
-credential_d|0|credentials are present in the message|this label cannot be missing in the system
-encrypted|1|denote the data are encrypted|this label cannot be missing in the system
-searchUpdate_d|1|denote the component search for a new update|(1)the component cannot search a new update (2)the component doesn't search for update in the log -> check if device can search for updates
-loginAttempt_c|0|denote an authentication attempt|(1)there is no authentication to exchange data with the component (2)the authentication phases are encrypted (3)there is no authentication in the log -> check if authentication needed to communicate with the component
-authenticated_c|0|denote the success of an authentication phase|this label cannot be missing in the system
-loginFail_c|0|denote the failure of an authentication phase|(1)there are no failure of authentication in the log -> check if authentication can fail
-lockout_c|0|the account id locked|(1) account cannot be locked (2) account are not locked in the log -> check if authentication is weak against brute force attack
-passwordRecovery|1|user try to recover a forgotten password|(1)user cannot recover forgotten password (2) user doesn't try to recover password in the log -> check if password recovery system(if it exist) doesn't give to much information about existing users
-blackListedWord|0|denote a black listed word in error message|this label cannot be missing in the system
-validResponse|1|the response is OK|no valid response
-errorResponse|1|the response is not OK|no error response
-unavailable|1|the component is unavailable|never unavailable in the model
-XSS_d|0|the request contain code injection|(1) the requests don't contain code injection in the log -> check if the web interface (if exists) is resistant to code injection
-SQLinjection_d|0|the message contains an SQL injection|(1)the system contains code injection that doesn't match the ones implemented (2)no SQl injection attempt was made during the log collection
+begin|An initial state, denote the potential beginning of a new session|this label cannot be missing in the system
+end|An initial state, denote the potential end, of a session|this label cannot be missing in the system
+from_c|denote the source of the message |this label cannot be missing in the system
+to_c|denote the destination of the message|this label cannot be missing in the system
+request|the message is a request|this label cannot be missing in the system
+response|the message is a response|this label cannot be missing in the system
+input|the message is an input|this label cannot be missing in the system
+output|the message is an output|this label cannot be missing in the system
+getUpdate_d|denote the sending of a new update file|(1)The components cannot receive update (2)no update occurred in the log -> check if device can receive updates
+cmdSearchUpdate|the order is given to search for a new update|this label cannot be missing in the system
+sensitive_d|sensitive data are present in the message|this label cannot be missing in the system
+credential_d|credentials are present in the message|this label cannot be missing in the system
+encrypted|denote the data are encrypted|this label cannot be missing in the system
+searchUpdate_d|denote the component search for a new update|(1)the component cannot search a new update (2)the component doesn't search for update in the log -> check if device can search for updates
+loginAttempt_c|denote an authentication attempt|(1)there is no authentication to exchange data with the component (2)the authentication phases are encrypted (3)there is no authentication in the log -> check if authentication needed to communicate with the component
+authenticated_c|denote the success of an authentication phase|this label cannot be missing in the system
+loginFail_c|denote the failure of an authentication phase|(1)there are no failure of authentication in the log -> check if authentication can fail
+lockout_c|the account id locked|(1) account cannot be locked (2) account are not locked in the log -> check if authentication is weak against brute force attack
+passwordRecovery|user try to recover a forgotten password|(1)user cannot recover forgotten password (2) user doesn't try to recover password in the log -> check if password recovery system(if it exist) doesn't give to much information about existing users
+blackListedWord|denote a black listed word in error message|this label cannot be missing in the system
+validResponse|the response is OK|no valid response
+errorResponse|the response is not OK|no error response
+unavailable|the component is unavailable|never unavailable in the model
+XSS_d|the request contain code injection|(1) the requests don't contain code injection in the log -> check if the web interface (if exists) is resistant to code injection
+SQLinjection_d|the message contains an SQL injection|(1)the system contains code injection that doesn't match the ones implemented (2)no SQl injection attempt was made during the log collection
