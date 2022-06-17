@@ -13,7 +13,7 @@
   <description>create an SMV file from a lts in a dotfile, in order to verify some properties using the tool NuSMV</description>
 
   <properties>
-    <runtime.version>7.29.0.Final</runtime.version>
+    <runtime.version>7.60.0.Final</runtime.version>
   </properties>
 
   <repositories>
